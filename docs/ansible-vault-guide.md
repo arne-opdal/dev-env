@@ -31,14 +31,14 @@ host_vars/
 
 ```yaml
 # group_vars/all/vars.yml
-NETBOX_TOKEN: "{{ vault_NETBOX_TOKEN }}"
+netbox_token: "{{ vault_netbox_token }}"
 ```
 
 **I vault-fil:**
 
 ```yaml
 # group_vars/all/vault.yml
-vault_NETBOX_TOKEN: netbox-token
+vault_netbox_token: netbox-token
 ```
 
 Med dette mønsteret kan du alltid se *hvilke* variabler som finnes (`grep` i `vars.yml`), selv når vault-filen er kryptert.

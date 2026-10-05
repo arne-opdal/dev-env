@@ -1,10 +1,12 @@
 FROM python:3.12-slim
 
 # Install basic tools including bash-completion
+# libatomic1 is required by the Node.js binary pre-commit downloads for markdownlint
 RUN apt-get update && apt-get install -y \
     git \
     bash-completion \
     ca-certificates \
+    libatomic1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user

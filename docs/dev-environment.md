@@ -4,7 +4,7 @@ Dette oppsettet er basert på at brukeren har en Windows 11 PC.
 Og vi bruker WSL2 med Ubuntu 24.04, docker for devcontainers og VSCode som editor
 
 Dette er i første rekke en hjelp for netverkskonsulenter for å komme opp på felles
-verktøyplatform for deling av kode og enkelt kunne hoppe inn o kjøre andres kode.
+verktøyplatform for deling av kode og enkelt kunne hoppe inn og kjøre andres kode.
 
 ## Arkitektur-oversikt
 

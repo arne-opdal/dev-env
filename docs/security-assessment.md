@@ -314,14 +314,14 @@ echo "$USERNAME ALL=(root) NOPASSWD: /usr/bin/apt-get, /usr/bin/systemctl" > /et
 # ALDRI i produksjon:
 - name: Show password
   ansible.builtin.debug:
-    msg: "PASSWORD: {{ PASSWORD }}"  # ❌ IKKE gjør dette!
+    msg: "PASSWORD: {{ password }}"  # ❌ IKKE gjør dette!
 
 # Bruk heller:
 - name: Test password (no output)
   ansible.builtin.assert:
     that:
-      - PASSWORD is defined
-      - PASSWORD | length > 0
+      - password is defined
+      - password | length > 0
     fail_msg: "Password not configured"
     # no_log: true  # ✅ Skjuler output
 ```
