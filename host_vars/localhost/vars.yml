@@ -1,4 +1,4 @@
 # Vars for localhost
 ---
-USER: localhost-user
-PASSWORD: "{{ vault_PASSWORD }}"
+user: localhost-user
+password: "{{ vault_password }}"

@@ -1,154 +1,157 @@
-# Ansible Vault med LastPass-integrasjon
+# Ansible Vault
 
 ## Oversikt
 
-Dette prosjektet bruker LastPass CLI for å sikret håndtere Ansible Vault-passordet. Vault-passordet lagres i LastPass og hentes dynamisk, noe som sikrer at ingen klartekst-passord eksisterer i repositoriet.
+Ansible Vault brukes til å kryptere hemmeligheter (passord, API-nøkler, tokens) slik at de kan lagres trygt i Git.
 
-## Oppsett
+I dette treningsmiljøet ligger vault-filene **ukryptert** (`vault.yml`), slik at alt fungerer uten passord fra første dag. Det gjør det enkelt å se hvordan variablene henger sammen, og å øve på kryptering og dekryptering selv.
 
-### 1. Innledende LastPass-pålogging
+!!! warning "Kun for trening"
+    Ukrypterte vault-filer er greit i et lab-miljø uten ekte hemmeligheter. I produksjon skal vault-filene alltid være kryptert, og vault-passordet skal ligge i en passordhåndterer, ikke i repoet.
 
-Etter at devcontaineren er startet, logg inn på LastPass:
+## Struktur
 
-```bash
-lpass-login
+Hemmeligheter ligger i egne `vault.yml`-filer, og refereres fra `vars.yml` med prefikset `vault_`:
+
+```text
+group_vars/
+  all/
+    vars.yml      # Klartekst-variabler
+    vault.yml     # Hemmeligheter (ukryptert i trening)
+  grp1/
+    vars.yml
+    vault.yml
+host_vars/
+  host1/
+    vars.yml
+    vault.yml
 ```
 
-Dette vil:
-- Be om din LastPass-e-post (hvis du ikke allerede er logget inn)
-- Autentisere med LastPass
-- Sette miljøvariabelen `ANSIBLE_VAULT_PASSWORD_FILE`
-- Aktivere transparent tilgang til vault-passordet for alle Ansible-kommandoer
+**I vars-fil:**
 
-### 2. Verifiser oppsettet
+```yaml
+# group_vars/all/vars.yml
+NETBOX_TOKEN: "{{ vault_NETBOX_TOKEN }}"
+```
 
-Sjekk at miljøvariabelen er satt:
+**I vault-fil:**
+
+```yaml
+# group_vars/all/vault.yml
+vault_NETBOX_TOKEN: netbox-token
+```
+
+Med dette mønsteret kan du alltid se *hvilke* variabler som finnes (`grep` i `vars.yml`), selv når vault-filen er kryptert.
+
+---
+
+## Sette opp et vault-passord
+
+For å kryptere trenger Ansible et vault-passord. I treningsmiljøet legger vi det i en lokal fil, `.vault_pass`, som allerede står i `.gitignore` og derfor aldri blir commitet.
+
+```bash
+# Lag passordfilen (velg ditt eget passord)
+echo 'mitt-trenings-passord' > .vault_pass
+chmod 600 .vault_pass
+
+# Fortell Ansible hvor passordet ligger
+export ANSIBLE_VAULT_PASSWORD_FILE=$PWD/.vault_pass
+```
+
+Legg gjerne `export`-linjen i `.env` (også i `.gitignore`) og last den inn med `source .env` når du starter en ny terminal.
+
+Verifiser oppsettet:
 
 ```bash
 echo $ANSIBLE_VAULT_PASSWORD_FILE
-# Skal gi: /workspaces/dev-setup/.devcontainer/vault-password-file.sh
 ```
 
-Test vault-tilgang:
+Alternativt kan du la Ansible spørre om passordet hver gang med `--ask-vault-pass`:
 
 ```bash
-ansible-vault --version
+ansible-vault view group_vars/all/vault.yml --ask-vault-pass
 ```
 
 ---
 
 ## Jobbe med Ansible Vault
 
-Når du har kjørt `lpass-login`, fungerer alle Ansible Vault-kommandoer automatisk uten passord-prompt.
+### Kryptere eksisterende filer
+
+Krypter en vault-fil på stedet:
+
+```bash
+ansible-vault encrypt host_vars/host1/vault.yml
+```
+
+Krypter alle vault-filene:
+
+```bash
+ansible-vault encrypt group_vars/*/vault.yml host_vars/*/vault.yml
+```
+
+Åpne filen etterpå, så ser du at innholdet starter med `$ANSIBLE_VAULT;1.1;AES256`.
 
 ### Vise krypterte filer
 
-Vis innholdet i en kryptert fil:
-
 ```bash
-ansible-vault view group_vars/all/vault
-```
-
-Vis en spesifikk hosts vault:
-
-```bash
-ansible-vault view host_vars/host1/vault
+ansible-vault view group_vars/all/vault.yml
 ```
 
 ### Redigere krypterte filer
 
-Rediger en kryptert fil i standardeditoren din:
-
 ```bash
-ansible-vault edit group_vars/all/vault
+ansible-vault edit group_vars/all/vault.yml
 ```
 
 Dette vil:
+
 1. Dekryptere filen midlertidig
 2. Åpne den i editoren din
 3. Kryptere den på nytt når du lagrer og lukker
 
 ### Opprette nye krypterte filer
 
-Opprett en ny kryptert fil:
-
 ```bash
-ansible-vault create group_vars/grp2/vault
-```
-
-Eller opprett fra en eksisterende klartekst-fil:
-
-```bash
-# Opprett først en klartekst-fil
-cat > /tmp/secrets.yml << EOF
----
-api_key: "my-secret-key"
-db_password: "super-secret"
-EOF
-
-# Krypter den
-ansible-vault encrypt /tmp/secrets.yml
-mv /tmp/secrets.yml group_vars/all/vault
-```
-
-### Kryptere eksisterende filer
-
-Krypter en klartekst-fil på stedet:
-
-```bash
-ansible-vault encrypt host_vars/host1/vault
-```
-
-Krypter flere filer:
-
-```bash
-ansible-vault encrypt group_vars/*/vault host_vars/*/vault
+ansible-vault create group_vars/grp2/vault.yml
 ```
 
 ### Dekryptere filer
 
-Dekrypter for å vise i klartekst (bruk med forsiktighet):
+Gå tilbake til klartekst (for eksempel for å nullstille treningsmiljøet):
 
 ```bash
-ansible-vault decrypt group_vars/all/vault
+ansible-vault decrypt group_vars/*/vault.yml host_vars/*/vault.yml
 ```
 
-**Advarsel:** Dette etterlater filen ukryptert. Husk å kryptere den på nytt:
+### Endre vault-passord
+
+Bytt passord på krypterte filer:
 
 ```bash
-ansible-vault encrypt group_vars/all/vault
+ansible-vault rekey group_vars/all/vault.yml
 ```
 
-### Endre Vault-passord
-
-Hvis vault-passordet endres i LastPass, må du re-kryptere eksisterende krypterte filer:
+Eller alle på én gang:
 
 ```bash
-# Oppdater alle vault-filer med nytt passord
-ansible-vault rekey group_vars/all/vault
-ansible-vault rekey group_vars/grp1/vault
-ansible-vault rekey host_vars/host1/vault
+find . -name vault.yml -not -path './.ansible/*' -exec ansible-vault rekey {} \;
 ```
 
-Eller re-krypter alle på én gang:
-
-```bash
-find . -path "*/vault" -exec ansible-vault rekey {} \;
-```
+Husk å oppdatere `.vault_pass` med det nye passordet etterpå.
 
 ---
 
 ## Kryptere spesifikke variabler
 
-Du kan kryptere individuelle variabler i en klartekst-fil ved å bruke `encrypt_string`:
-
-### Krypter en enkelt variabel
+Du kan kryptere individuelle variabler i en klartekst-fil med `encrypt_string`:
 
 ```bash
 ansible-vault encrypt_string 'my-secret-value' --name 'my_secret_var'
 ```
 
 Output:
+
 ```yaml
 my_secret_var: !vault |
           $ANSIBLE_VAULT;1.1;AES256
@@ -164,161 +167,67 @@ ansible-vault encrypt_string --name 'db_password'
 # Skriv eller lim inn hemmeligheten, trykk deretter Ctrl+D to ganger
 ```
 
-### Eksempel: Kombinerte krypterte og klartekst-variabler
-
-```yaml
-# group_vars/all/vars
----
-# Klartekst-variabler
-app_name: my-application
-app_port: 8080
-
-# Krypterte variabler
-db_password: !vault |
-          $ANSIBLE_VAULT;1.1;AES256
-          66386439653966653431626...
-
-api_key: !vault |
-          $ANSIBLE_VAULT;1.1;AES256
-          31323334353637383930616...
-```
+Da havner ikke hemmeligheten i shell-historikken.
 
 ---
 
 ## Kjøre playbooks
 
-Med LastPass-integrasjonen kjører playbooks uten spesielle flagg:
-
-```bash
-ansible-playbook playbooks/your-playbook.yml
-```
-
-### Debugge krypterte variabler
-
-Test at vault-variabler er tilgjengelige:
+Så lenge vault-filene er ukryptert, kjører playbooks uten spesielle flagg:
 
 ```bash
 ansible-playbook playbooks/debug/show-secrets-all.yml
 ```
 
-Dette vil vise alle krypterte variabler fra inventaret ditt.
+Når filene er kryptert, må Ansible ha passordet. Det får den automatisk hvis `ANSIBLE_VAULT_PASSWORD_FILE` er satt, ellers bruker du:
+
+```bash
+ansible-playbook playbooks/debug/show-secrets-all.yml --ask-vault-pass
+```
 
 ### Kjøre mot spesifikke hosts
 
 ```bash
-ansible-playbook playbooks/your-playbook.yml --limit host1
-ansible-playbook playbooks/your-playbook.yml --limit grp1
-```
-
----
-
-## Vanlige Vault-mønstre
-
-### Mønster 1: Separate krypterte og klartekst-variabler
-
-**Struktur:**
-```
-group_vars/
-  all/
-    vars          # Klartekst-variabler
-    vault         # Krypterte hemmeligheter
-```
-
-**I vars-fil:**
-```yaml
-# group_vars/all/vars
-db_host: "database.example.com"
-db_port: 5432
-db_user: "app_user"
-# Referer til kryptert variabel
-db_password: "{{ vault_db_password }}"
-```
-
-**I vault-fil:**
-```yaml
-# group_vars/all/vault
-vault_db_password: "faktisk-hemmelig-passord"
-vault_api_key: "hemmelig-api-nøkkel"
-```
-
-### Mønster 2: Krypterte strenger i klartekst-filer
-
-```yaml
-# group_vars/all/vars
-db_host: "database.example.com"
-db_password: !vault |
-          $ANSIBLE_VAULT;1.1;AES256
-          66386439653966653431626...
-```
-
-### Mønster 3: Fullt krypterte filer
-
-```yaml
-# Hele filen er kryptert
-ansible-vault create group_vars/production/vault
+ansible-playbook playbooks/debug/show-secrets-all.yml --limit host1
+ansible-playbook playbooks/debug/show-secrets-all.yml --limit grp1
 ```
 
 ---
 
 ## Feilsøking
 
-### Miljøvariabel ikke satt
+### "Attempting to decrypt but no vault secrets found"
 
-Hvis `ANSIBLE_VAULT_PASSWORD_FILE` ikke er satt:
+Filen er kryptert, men Ansible har ikke fått passordet. Sett `ANSIBLE_VAULT_PASSWORD_FILE` eller bruk `--ask-vault-pass`.
 
-```bash
-# Kjør påloggings-skriptet på nytt
-source .devcontainer/lpass-login.sh
+### "Decryption failed"
 
-# Eller bruk funksjonen
-lpass-login
-```
+Passordet stemmer ikke med det filen ble kryptert med. Sjekk innholdet i `.vault_pass`, eller dekrypter med `--ask-vault-pass` og riktig passord.
 
-### LastPass-sesjon utløpt
+### "The vault password file ... was not found"
+
+`ANSIBLE_VAULT_PASSWORD_FILE` peker på en fil som ikke finnes. Lag filen, eller fjern variabelen:
 
 ```bash
-# Logg ut og inn igjen
-lpass logout
-lpass-login
-```
-
-### Feil Vault-passord
-
-Hvis du får dekrypteringsfeil:
-
-1. Verifiser at du kan hente passordet:
-   ```bash
-   lpass show vault-password -p
-   ```
-
-2. Sjekk at vault-filen ble kryptert med samme passord:
-   ```bash
-   ansible-vault view group_vars/all/vault
-   ```
-
-3. Om nødvendig, re-krypter filen med riktig passord
-
-### Sjekk gjeldende LastPass-status
-
-```bash
-lpass status
+unset ANSIBLE_VAULT_PASSWORD_FILE
 ```
 
 ---
 
 ## Sikkerhetspraksis
 
-### ✅ GJØR:
-- Kjør alltid `lpass-login` ved start av økten din
-- Hold vault-filer i `.gitignore` eller kryptert i Git
-- Bruk beskrivende navn for krypterte variabler (prefiks med `vault_`)
-- Roter vault-passord regelmessig
-- Logg ut av LastPass når du er ferdig: `lpass logout`
+### Gjør
 
-### ❌ IKKE GJØR:
-- Commit klartekst-hemmeligheter til Git
+- Hold vault-filer kryptert i Git i alle miljøer med ekte hemmeligheter
+- Bruk beskrivende navn for hemmelige variabler (prefiks med `vault_`)
+- Lagre vault-passordet i en passordhåndterer i produksjon
+- Roter vault-passord regelmessig
+
+### Ikke gjør
+
+- Commit klartekst-hemmeligheter fra ekte miljøer til Git
+- Commit `.vault_pass` eller `.env`
 - Del vault-passord i Slack/e-post
-- Dekrypter filer og la dem stå i klartekst
 - Lagre vault-passord i shell-historikk
 
 ---
@@ -334,56 +243,54 @@ lpass status
 | Dekrypter fil | `ansible-vault decrypt FIL` |
 | Krypter streng | `ansible-vault encrypt_string 'verdi' --name 'var'` |
 | Endre vault-passord | `ansible-vault rekey FIL` |
-| Kjør playbook | `ansible-playbook playbook.yml` |
+| Kjør playbook med passord-prompt | `ansible-playbook playbook.yml --ask-vault-pass` |
 | Vis debug-variabler | `ansible-playbook playbooks/debug/show-secrets-all.yml` |
 
 ---
 
-## Eksempler
+## Øvelser
 
-### Eksempel 1: Legg til en ny hemmelighet i gruppe
+### Øvelse 1: Krypter og dekrypter
 
 ```bash
-# Rediger vault-filen for grp1
-ansible-vault edit group_vars/grp1/vault
+# Se på verdiene i klartekst
+ansible-playbook playbooks/debug/show-secrets-all.yml
 
-# Legg til hemmeligheten din:
-# ---
-# vault_new_api_key: "hemmelig-nøkkel-her"
+# Krypter alle vault-filene
+ansible-vault encrypt group_vars/*/vault.yml host_vars/*/vault.yml
 
-# Referer til den i vars-filen
-echo 'new_api_key: "{{ vault_new_api_key }}"' >> group_vars/grp1/vars
+# Kjør samme playbook igjen - verdiene er de samme
+ansible-playbook playbooks/debug/show-secrets-all.yml
+
+# Gå tilbake til klartekst
+ansible-vault decrypt group_vars/*/vault.yml host_vars/*/vault.yml
 ```
 
-### Eksempel 2: Opprett ny host med hemmeligheter
+### Øvelse 2: Legg til en ny hemmelighet i en gruppe
 
 ```bash
-# Opprett mappe
+# Legg til hemmeligheten i vault-filen
+echo 'vault_new_api_key: "hemmelig-nøkkel-her"' >> group_vars/grp1/vault.yml
+
+# Referer til den i vars-filen
+echo 'new_api_key: "{{ vault_new_api_key }}"' >> group_vars/grp1/vars.yml
+```
+
+### Øvelse 3: Opprett ny host med kryptert vault
+
+```bash
 mkdir -p host_vars/newhost
 
-# Opprett klartekst-variabler
-cat > host_vars/newhost/vars << EOF
+cat > host_vars/newhost/vars.yml << EOF
 ---
 ansible_host: 192.168.1.100
 ansible_user: admin
 EOF
 
-# Opprett kryptert vault
-ansible-vault create host_vars/newhost/vault
+ansible-vault create host_vars/newhost/vault.yml
 # Legg til hemmeligheter i editoren som åpnes:
 # ---
 # vault_ansible_password: "hemmelig-passord"
-# vault_api_key: "hemmelig-nøkkel"
-```
-
-### Eksempel 3: Krypter sensitiv streng
-
-```bash
-# Generer kryptert streng for et passord
-ansible-vault encrypt_string 'MittHemmeligePassord123!' --name 'vault_sudo_password'
-
-# Kopier output inn i vars-filen din
-# Referer deretter som: ansible_become_pass: "{{ vault_sudo_password }}"
 ```
 
 ---
@@ -391,6 +298,4 @@ ansible-vault encrypt_string 'MittHemmeligePassord123!' --name 'vault_sudo_passw
 ## Ytterligere ressurser
 
 - [Offisiell Ansible Vault-dokumentasjon](https://docs.ansible.com/ansible/latest/vault_guide/index.html)
-- [LastPass CLI-dokumentasjon](https://github.com/lastpass/lastpass-cli)
-- Prosjektets sikkerhetsvurdering: `docs/security-assessment.md`
-- Status kritiske fikser: `docs/CRITICAL-FIXES.md`
+- Prosjektets sikkerhetsvurdering: [security-assessment](security-assessment.md)

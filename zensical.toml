@@ -1,0 +1,68 @@
+[project]
+site_name = "Oppsett Utviklingsmiljø"
+site_description = "Dokumentasjon for oppsett og vedlikehold av utviklingsmiljø"
+site_author = "Arne Opdal"
+site_url = "https://www.ao-test.net/dev-setup/"
+copyright = "&copy; 2025 Arne Opdal"
+
+repo_name = "arne/dev-env"
+repo_url = "https://git.opdal.net/arne/dev-env"
+
+nav = [
+  { "Hjem" = "index.md" },
+  { "Oppsett" = [
+    { "Oppsett av PC" = "dev-environment.md" },
+    { "Vedlikehold av Docker" = "docker-vedlikehold.md" },
+  ] },
+  { "Ansible" = [
+    { "Hemligheter i Ansible" = "ansible-vault-guide.md" },
+  ] },
+  { "Git" = [
+    { "Git grunnleggende" = "git-basics.md" },
+    { "Git Workflows (Fork & Branch)" = "git-workflows.md" },
+    { "Github Actions" = "github-actions-deploy.md" },
+    { "Pre-commit" = "pre-commit-guide.md" },
+    { "Conventional Commits" = "conventional-commits.md" },
+    { "GitHub Branch Protection" = "github-branch-protection.md" },
+  ] },
+  { "Sikkerhets betraktninger" = [
+    { "Security assessment" = "security-assessment.md" },
+  ] },
+]
+
+[project.theme]
+language = "nb"
+features = [
+  "navigation.tabs",
+  "navigation.sections",
+  "navigation.expand",
+  "navigation.top",
+  "search.suggest",
+  "search.highlight",
+  "content.code.copy",
+]
+
+# Palette toggle for light mode
+[[project.theme.palette]]
+scheme = "default"
+primary = "indigo"
+accent = "indigo"
+toggle.icon = "material/brightness-7"
+toggle.name = "Bytt til mørk modus"
+
+# Palette toggle for dark mode
+[[project.theme.palette]]
+scheme = "slate"
+primary = "indigo"
+accent = "indigo"
+toggle.icon = "material/brightness-4"
+toggle.name = "Bytt til lys modus"
+
+[project.markdown_extensions]
+admonition = {}
+attr_list = {}
+pymdownx.emoji.emoji_index = "zensical.extensions.emoji.twemoji"
+pymdownx.emoji.emoji_generator = "zensical.extensions.emoji.to_svg"
+pymdownx.superfences.custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]

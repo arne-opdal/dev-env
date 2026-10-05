@@ -1,5 +1,4 @@
-mkdocs
-mkdocs-material
+zensical
 ansible-core>=2.19.10,<2.20.0
 ansible-lint
 pre-commit

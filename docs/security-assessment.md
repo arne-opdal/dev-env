@@ -22,8 +22,7 @@ Dette repoet er designet som et **praktisk opplæringsmiljø** for nettverkskons
 
 ✅ **UTMERKEDE OPPLÆRINGSPRAKSIS:**
 
-- LastPass CLI-integrasjon for secret management (produksjonsklar)
-- Ansible Vault for krypterte variabler (beste praksis)
+- Ansible Vault-mønster for hemmeligheter (beste praksis)
 - Pre-commit hooks for kodekvalitet (DevOps standard)
 - Conventional Commits og automatisk versjonering (moderne workflow)
 - Omfattende dokumentasjon på norsk (tilgjengelig for målgruppen)
@@ -33,6 +32,7 @@ Dette repoet er designet som et **praktisk opplæringsmiljø** for nettverkskons
 
 - SSH host key checking deaktivert (OK i lab, dokumentert risiko)
 - Passwordless sudo i container (praktisk for læring, risikofritt i isolert miljø)
+- Ukrypterte vault-filer (kun dummy-verdier, enkelt å øve på kryptering)
 - Debug-playbooks som viser secrets (pedagogisk verktøy, klart merket)
 
 🚨 **FORBEDRINGER FØR PRODUKSJON:**
@@ -59,7 +59,6 @@ Dette repoet balanserer pedagogikk med sikkerhet. Her er vurderingen fra et oppl
 
 #### 2. **Gode sikkerhetsvaner innebygd**
 
-- **LastPass CLI-integrasjon** lærer secret management fra dag 1
 - **Ansible Vault** viser hvordan man håndterer hemmeligheter
 - **Pre-commit hooks** lærer automatisert kvalitetskontroll
 - **Git best practices** med conventional commits
@@ -84,6 +83,7 @@ Dette repoet balanserer pedagogikk med sikkerhet. Her er vurderingen fra et oppl
 | `NOPASSWD:ALL` sudo | ✅ OK | ⚠️ Begrens | Friksjonsfritt for eksperimentering |
 | Debug-playbooks | ✅ OK | ❌ Fjern | Viser hvordan variabler fungerer |
 | Unpinned packages | ⚠️ Akseptabelt | ❌ Pin alt | Får nyeste versjoner, lettere å starte |
+| Ukrypterte vault-filer | ✅ OK (dummy-verdier) | ❌ Krypter alltid | Lett å se sammenhengen, øve på `encrypt`/`decrypt` |
 
 **Viktig:** Alle disse trade-offs er **bevisste valg** for opplæring og er **dokumentert** som ikke-produksjonsklare.
 
@@ -93,42 +93,25 @@ Dette repoet balanserer pedagogikk med sikkerhet. Her er vurderingen fra et oppl
 
 ### ✅ POSITIVE SECURITY PRACTICES
 
-#### 1. **🔐 Secrets Management med LastPass CLI (PRODUCTION-READY)**
+#### 1. **🔒 Ansible Vault-mønster for sensitive data**
 
-- **Status:** ✅ EXCELLENT
-- **Implementasjon:**
-
-  ```bash
-  # vault-password-file.sh
-  #!/usr/bin/bash
-  lpass show "vault-password" -p
-  ```
-
-- **Hvorfor dette er bra:**
-    - Ingen klartekst passwords i repository
-    - Vault password hentes dynamisk fra LastPass
-    - `ANSIBLE_VAULT_PASSWORD_FILE` miljøvariabel automatisk konfigurert
-    - Brukere lærer secret management fra dag 1
-- **Produksjonsverdi:** ⭐⭐⭐⭐⭐ (Kan brukes direkte i produksjon)
-
-#### 2. **🔒 Ansible Vault for Sensitive Data (PRODUCTION-READY)**
-
-- **Status:** ✅ EXCELLENT
-- **Details:** All sensitiv data er kryptert i vault-filer
+- **Status:** ✅ GOOD (for opplæring)
+- **Details:** Hemmeligheter ligger i egne vault-filer. I treningsmiljøet er de ukryptert og inneholder kun dummy-verdier.
 - **Struktur:**
 
   ```
-  group_vars/all/vars    # klartekst referanser
-  group_vars/all/vault   # Krypterte verdier
+  group_vars/all/vars.yml    # klartekst referanser
+  group_vars/all/vault.yml   # Hemmeligheter (krypteres i produksjon)
   ```
 
 - **Hvorfor dette er bra:**
     - Standard Ansible beste praksis
-    - Secrets kan commites trygt til Git
     - Tydelig separasjon mellom public og secret data
-- **Produksjonsverdi:** ⭐⭐⭐⭐⭐ (Industri-standard)
+    - Studentene øver selv på `ansible-vault encrypt`/`decrypt` med en lokal `.vault_pass`
+- **Produksjonskrav:** Krypter alle vault-filer, og lagre vault-passordet i en passordhåndterer
+- **Produksjonsverdi:** ⭐⭐⭐⭐⭐ (Industri-standard når filene er kryptert)
 
-#### 3. **🛡️ Omfattende .gitignore (PRODUCTION-READY)**
+#### 2. **🛡️ Omfattende .gitignore (PRODUCTION-READY)**
 
 - **Status:** ✅ EXCELLENT
 - **Highlights:**
@@ -156,7 +139,7 @@ __pycache__/
 - **Pedagogisk verdi:** Lærer studenter hva som IKKE skal commites
 - **Produksjonsverdi:** ⭐⭐⭐⭐⭐
 
-#### 4. **🔨 Pre-commit Hooks for Code Quality (PRODUCTION-READY)**
+#### 3. **🔨 Pre-commit Hooks for Code Quality (PRODUCTION-READY)**
 
 - **Status:** ✅ EXCELLENT
 - **Konfigurert hooks:**
@@ -171,7 +154,7 @@ __pycache__/
 - **Pedagogisk verdi:** ⭐⭐⭐⭐⭐ (Introduserer automation fra dag 1)
 - **Produksjonsverdi:** ⭐⭐⭐⭐⭐
 
-#### 5. **📦 Conventional Commits & Automatic Versioning (PRODUCTION-READY)**
+#### 4. **📦 Conventional Commits & Automatic Versioning (PRODUCTION-READY)**
 
 - **Status:** ✅ EXCELLENT
 - **Implementasjon:**
@@ -186,7 +169,7 @@ __pycache__/
 - **Pedagogisk verdi:** ⭐⭐⭐⭐⭐ (Moderne DevOps praksis)
 - **Produksjonsverdi:** ⭐⭐⭐⭐⭐
 
-#### 6. **🐳 Non-Root Container User**
+#### 5. **🐳 Non-Root Container User**
 
 - **Status:** ✅ GOOD
 - **Implementasjon:**
@@ -201,7 +184,7 @@ USER $USERNAME  # vscode user, not root
     - Lærer security-by-default mentalitet
 - **Produksjonsverdi:** ⭐⭐⭐⭐⭐
 
-#### 7. **📦 Minimal Base Image**
+#### 6. **📦 Minimal Base Image**
 
 - **Status:** ✅ GOOD
 - **Implementasjon:** `python:3.12-slim`
@@ -211,7 +194,7 @@ USER $USERNAME  # vscode user, not root
     - Raskere builds
 - **Produksjonsverdi:** ⭐⭐⭐⭐
 
-#### 8. **📚 Omfallende norsk dokumentasjon**
+#### 7. **📚 Omfallende norsk dokumentasjon**
 
 - **Status:** ✅ EXCELLENT for målgruppen
 - **Dokumentasjon:**
@@ -378,7 +361,7 @@ Disse endringene er **ikke kritiske for opplæring**, men **nødvendige for prod
   ```txt
   # requirements.txt
   ansible>=11.0.0  # ⚠️ Åpen versjon
-  mkdocs-material
+  zensical
   pre-commit
   ```
 
@@ -388,7 +371,7 @@ Disse endringene er **ikke kritiske for opplæring**, men **nødvendige for prod
   ```txt
   # requirements.txt - PRODUCTION VERSION
   ansible==11.1.0
-  mkdocs-material==9.5.3
+  zensical==0.0.67
   pre-commit==4.0.1
 
   # Generate with:
@@ -510,8 +493,8 @@ Disse endringene er **ikke kritiske for opplæring**, men **nødvendige for prod
 ### ✅ HVA STUDENTENE LÆRER (Production-Ready Skills)
 
 1. **Secret Management:**
-    - LastPass CLI for secure password storage
     - Ansible Vault for encrypting sensitive data
+    - Password manager for vault password i produksjon
     - Environment variables vs plaintext files
     - `.gitignore` for preventing credential leaks
 
@@ -525,7 +508,7 @@ Disse endringene er **ikke kritiske for opplæring**, men **nødvendige for prod
     - Git best practices
     - CI/CD med GitHub Actions
     - Infrastructure as Code (Ansible)
-    - Documentation as Code (MkDocs)
+    - Documentation as Code (Zensical)
 
 4. **Container Security Basics:**
     - Non-root users
@@ -562,7 +545,7 @@ Disse endringene er **ikke kritiske for opplæring**, men **nødvendige for prod
    ```txt
    # requirements.txt - PRODUCTION
    ansible==11.1.0        # ✅ Exact versions
-   mkdocs-material==9.5.3
+   zensical==0.0.67
    pre-commit==4.0.1
    ```
 
@@ -581,8 +564,8 @@ Disse endringene er **ikke kritiske for opplæring**, men **nødvendige for prod
 
 | Item | Status | Vurdering |
 |------|--------|-----------|
-| LastPass CLI secret management | ✅ Implementert | Production-ready |
-| Ansible Vault encryption | ✅ Implementert | Production-ready |
+| Ansible Vault-struktur | ✅ Implementert | Production-ready mønster |
+| Krypterte vault-filer | ⚠️ Ukryptert | **OK for lab, IKKE produksjon** |
 | Comprehensive .gitignore | ✅ Implementert | Production-ready |
 | Pre-commit hooks | ✅ Implementert | Production-ready |
 | Conventional Commits | ✅ Implementert | Production-ready |
@@ -606,6 +589,7 @@ Disse endringene er **ikke kritiske for opplæring**, men **nødvendige for prod
 | Add dependency scanning | ❌ | MEDIUM | Legg til Dependabot/pip-audit |
 | Add secrets scanning | ❌ | LOW | Legg til detect-secrets |
 | Create SECURITY.md | ❌ | LOW | Dokumenter security policy |
+| Encrypt all vault files | ❌ | HIGH | `ansible-vault encrypt` + password manager |
 | Review all secrets | ❌ | HIGH | Audit all vault files |
 | Enable branch protection | ✅ | HIGH | Already configured |
 
@@ -625,7 +609,7 @@ Dette repoet gjør en **utmerket jobb** med å balansere:
 
 ✅ **Sikkerhetsvaner:**
 
-- Lærer secret management fra dag 1 (LastPass + Vault)
+- Lærer secret management fra dag 1 (Ansible Vault)
 - Introduserer code quality automation (pre-commit)
 - Viser moderne DevOps workflow (Git, CI/CD)
 - Dokumenterer sikkerhetsbetraktninger tydelig
@@ -645,7 +629,8 @@ Dette repoet gjør en **utmerket jobb** med å balansere:
    - SSH host key checking fungerer normalt på dedikert server
    - Fjern passwordless sudo
    - Pin alle dependencies
-   - Slett debug-playbooks"
+   - Slett debug-playbooks
+   - Krypter alle vault-filer"
    ```
 
 2. **Inkluder produksjonsøvelse:**
@@ -666,7 +651,7 @@ Dette repoet gjør en **utmerket jobb** med å balansere:
 
 **Dette er et utmerket opplæringsmiljø** som:
 
-- Lærer production-ready secret management (LastPass, Vault)
+- Lærer secret management med Ansible Vault
 - Introduserer moderne DevOps praksis (pre-commit, CI/CD)
 - Balanserer pedagogikk med sikkerhet
 - Har comprehensive dokumentasjon på norsk
@@ -674,8 +659,7 @@ Dette repoet gjør en **utmerket jobb** med å balansere:
 
 **Strengths:**
 
-- ✅ LastPass CLI-integrasjon (production-ready)
-- ✅ Ansible Vault (industry standard)
+- ✅ Ansible Vault-mønster (industry standard)
 - ✅ Pre-commit hooks (DevOps best practice)
 - ✅ Conventional Commits (modern workflow)
 - ✅ Excellent .gitignore
@@ -687,14 +671,16 @@ Dette repoet gjør en **utmerket jobb** med å balansere:
 - ⚠️ Passwordless sudo in container (safe in isolated env)
 - ⚠️ Debug playbooks (pedagogical tools)
 - ⚠️ Unpinned packages (gets latest versions)
+- ⚠️ Unencrypted vault files (dummy values only)
 
 **Before Production:**
 
 1. 🚨 Remove debug playbooks
-2. ⚠️ Pin all dependencies
-3. ⚠️ Review and harden sudo access (hvis container brukes)
-4. ⚠️ Add security scanning
-5. ℹ️ SSH host key checking: Auto-OK på prod-server
+2. 🚨 Encrypt all vault files
+3. ⚠️ Pin all dependencies
+4. ⚠️ Review and harden sudo access (hvis container brukes)
+5. ⚠️ Add security scanning
+6. ℹ️ SSH host key checking: Auto-OK på prod-server
 
 ### For Produksjonsmiljø: ⚠️ (Requires Hardening)
 

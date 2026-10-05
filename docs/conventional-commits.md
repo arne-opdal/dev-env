@@ -51,7 +51,7 @@ Dette gir en MAJOR versjonsbump (x.0.0).
 ### Enkel feature
 
 ```bash
-git commit -m "feat: legg til lastpass-cli integrasjon"
+git commit -m "feat: legg til zensical dokumentasjon"
 ```
 
 ### Feature med scope
@@ -178,7 +178,7 @@ git push origin main
 
 ```bash
 # Scenario 1: Feature (minor bump)
-$ git commit -m "feat: legg til lastpass support"
+$ git commit -m "feat: legg til zensical support"
 $ git push origin main
 # → Versjon 0.1.0 → 0.2.0
 # → Tag v0.2.0 opprettet
@@ -216,7 +216,7 @@ Workflowen genererer automatisk kategorisert changelog:
 - feat!: endre til Python 3.12
 
 ### ✨ Features
-- feat: legg til lastpass support
+- feat: legg til zensical support
 - feat(docker): forbedre volume mounting
 
 ### 🐛 Bug Fixes
@@ -327,7 +327,7 @@ git push origin main
 ```
 v1.0.0 - Major Release
   feat!: migrert til Python 3.12
-  feat: lagt til LastPass integrasjon
+  feat: lagt til Zensical dokumentasjon
   feat: implementert pre-commit hooks
   docs: komplett dokumentasjon
 

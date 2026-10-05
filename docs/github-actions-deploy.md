@@ -1,8 +1,8 @@
-# GitHub Actions - Deploy MkDocs til Egen Server
+# GitHub Actions - Deploy Zensical til Egen Server
 
 ## Oversikt
 
-Dette prosjektet bruker GitHub Actions for å automatisk bygge og deploye MkDocs-dokumentasjonen til din egen server hver gang det gjøres endringer i dokumentasjonen. Dette sikrer at dokumentasjonen alltid er oppdatert uten manuell inngripen.
+Dette prosjektet bruker GitHub Actions for å automatisk bygge og deploye Zensical-dokumentasjonen til din egen server hver gang det gjøres endringer i dokumentasjonen. Dette sikrer at dokumentasjonen alltid er oppdatert uten manuell inngripen.
 
 ## Hvordan det fungerer
 
@@ -11,7 +11,7 @@ Workflowen (`.github/workflows/deploy-docs.yml`) kjører automatisk når:
 1. **Du pusher til main-branchen** og endringer påvirker:
     - Filer i `docs/`-mappen
     - `README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`
-    - `mkdocs.yml` (konfigurasjonsfil)
+    - `zensical.toml` (konfigurasjonsfil)
     - `requirements-docs.txt` (Python-avhengigheter)
     - Selve workflow-filen
 
@@ -50,14 +50,14 @@ Installerer Python 3.11 og cacher pip-pakker for raskere kjøring.
     pip install -r requirements-docs.txt
 ```
 
-Installerer MkDocs og alle plugins definert i `requirements-docs.txt`.
+Installerer Zensical og alle avhengigheter definert i `requirements-docs.txt`.
 
 ### 4. Bygg dokumentasjonen
 
 ```yaml
 - name: Build documentation
   run: |
-    mkdocs build --clean --verbose
+    zensical build --clean
 ```
 Bygger statiske HTML-filer fra Markdown-dokumentasjonen. Resultatet plasseres i `site/`-mappen.
 
@@ -302,11 +302,11 @@ sudo systemctl reload apache2
 
 **Løsning:**
 
-1. Sjekk at alle MkDocs-plugins er listet i `requirements-docs.txt`
+1. Sjekk at alle avhengigheter er listet i `requirements-docs.txt`
 2. Test lokalt med:
    ```bash
    pip install -r requirements-docs.txt
-   mkdocs build
+   zensical build
    ```
 
 ---
@@ -363,6 +363,6 @@ Dette tillater kun rsync til den spesifikke mappen.
 ## Ytterligere ressurser
 
 - [GitHub Actions dokumentasjon](https://docs.github.com/en/actions)
-- [MkDocs dokumentasjon](https://www.mkdocs.org/)
+- [Zensical dokumentasjon](https://zensical.org/docs/)
 - [rsync-deployments action](https://github.com/Burnett01/rsync-deployments)
 - [GitHub Secrets dokumentasjon](https://docs.github.com/en/actions/security-guides/encrypted-secrets)

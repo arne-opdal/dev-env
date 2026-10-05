@@ -1,5 +1,4 @@
-mkdocs
-mkdocs-material
+zensical
 # ansible>=11.0.0,<12.0.0
 # ansible-lint
 # # Required by arubanetworks.aoscx collection

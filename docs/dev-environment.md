@@ -22,8 +22,7 @@ graph TB
         subgraph DevContainer["📦 DevContainer"]
             Python["🐍 Python 3.12"]
             Ansible["⚙️ Ansible"]
-            LastPass["🔐 LastPass CLI"]
-            MkDocs["📚 MkDocs"]
+            Zensical["📚 Zensical"]
             PreCommit["✅ Pre-commit"]
             Git["📝 Git"]
         end
@@ -31,7 +30,7 @@ graph TB
 
     VSCode -.->|"Remote WSL"|FileSystem
     VSCode ==>|"Dev Container"|DevContainer
-    Browser -.->|"Port Forward"|MkDocs
+    Browser -.->|"Port Forward"|Zensical
     DockerEngine -->|"Runs"|DevContainer
     FileSystem -->|"Mounts"|DevContainer
 
@@ -47,7 +46,7 @@ graph TB
 - **Windows 11**: Din fysiske PC, kjører VS Code og browser
 - **WSL2**: Linux-miljø i Windows, kjører Docker Engine
 - **DevContainer**: Isolert utviklingsmiljø med alle verktøy installert
-- **Port Forwarding**: Tilgang til tjenester som kjører i containeren (f.eks. MkDocs på port 8000)
+- **Port Forwarding**: Tilgang til tjenester som kjører i containeren (f.eks. Zensical på port 8000)
 
 ## Installasjon av WSL2
 
@@ -164,8 +163,7 @@ source ~/.bashrc
 ```
 
 Du blir spurt om passordet. For sessjonen vil du nå ikke bli spurt om passordet på
-nøkkelen hver gang den er i bruk. Det er mulig å legge passordet i lastpass og bruke
-commandline lpass osv.
+nøkkelen hver gang den er i bruk.
 
 ## VSCode
 
@@ -216,21 +214,20 @@ Velg Reopen in Container, og nå bygges containeren så det tar litt tid første
 Når den er klar kan du teste å starte opp denne dokumentasjonen lokalt med:
 
 ```bash
-mkdocs serve
+zensical serve
 ```
 
 Nå stares det opp en webserver lokalt:
 
 ```bash
-INFO    -  Building documentation...
-INFO    -  Cleaning site directory
-INFO    -  Documentation built in 0.25 seconds
-INFO    -  [09:20:44] Serving on http://127.0.0.1:8000/
+Serving /workspace/site on http://localhost:8000
+Build started
+Build finished in 0.30s
 ```
 
 Nå dukker det opp en melding i nedere høyre hjørne:
 
-![Open mkdocs](images/open-mkdocs.png)
+![Open in browser](images/open-mkdocs.png)
 
 Velg Open in Browser og fortsett med neste øvelse :smile:
 

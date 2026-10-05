@@ -16,7 +16,7 @@ Nettverkskonsulenter som ønsker å:
 Dette er et **opplæringsmiljø** med bevisste trade-offs for pedagogikk:
 
 ✅ **Production-ready praksis du lærer:**
-- Secret management med LastPass CLI og Ansible Vault
+- Secret management med Ansible Vault
 - Pre-commit hooks for automatisk kvalitetskontroll
 - Conventional Commits og semantic versioning
 - CI/CD med GitHub Actions
@@ -27,6 +27,7 @@ Dette er et **opplæringsmiljø** med bevisste trade-offs for pedagogikk:
 - Passwordless sudo i container (trygt i isolert miljø)
 - Debug playbooks inkludert (pedagogisk verktøy)
 - Unpinned dependencies (får nyeste versjoner)
+- Ukrypterte vault-filer (enkelt å se og øve på kryptering)
 
 **📚 Les mer:** Se `docs/security-assessment.md` for full security review og produksjonsvei.
 
@@ -95,7 +96,7 @@ source .venv/bin/activate
 **Installer pakker:**
 
 ```bash
-pip install mkdocs
+pip install zensical
 # eller fra en requirements.txt fil
 pip install -r requirements.txt
 ```
@@ -139,7 +140,7 @@ Alle guider er på norsk og dekker:
 - [Docker Vedlikehold](docs/docker-vedlikehold.md) - Vedlikehold og troubleshooting
 
 ### Ansible & Secrets
-- [Ansible Vault Guide](docs/ansible-vault-guide.md) - Håndtering av hemmeligheter med LastPass
+- [Ansible Vault Guide](docs/ansible-vault-guide.md) - Håndtering av hemmeligheter med Ansible Vault
 - [Security Assessment](docs/security-assessment.md) - Full security review (lab vs. produksjon)
 - [Critical Fixes](docs/CRITICAL-FIXES.md) - Viktige sikkerhetspunkter
 
@@ -155,8 +156,7 @@ Alle guider er på norsk og dekker:
 ## 🔐 Sikkerhetspraksis
 
 ### ✅ Hva er implementert (production-ready)
-- **LastPass CLI**: Sikker lagring av vault password
-- **Ansible Vault**: Krypterte variabler i Git
+- **Ansible Vault**: Mønster for hemmeligheter (`vars.yml` + `vault.yml`), klart for kryptering
 - **Pre-commit hooks**: Automatisk linting og validation
 - **Comprehensive .gitignore**: Beskytter mot credential leaks
 - **Branch protection**: PAT-basert CI/CD
@@ -178,7 +178,7 @@ FROM python:3.12.7-slim@sha256:...
 
 # Rediger requirements.txt til eksakte versjoner:
 ansible==11.1.0
-mkdocs-material==9.5.3
+zensical==0.0.67
 ```
 
 Se `docs/security-assessment.md` for komplett checklist.

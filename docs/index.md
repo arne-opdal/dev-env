@@ -1,11 +1,11 @@
-# GærneArnes nettverksskole
+# Oppsett Utviklingsmiljø
 
 Dette er en liten samling av ting som kan være nyttig.
 
 For å sette opp utviklingsmiljøet på din Windows 11 maskin så følg oppsettet i
 [dev-environment](dev-environment.md).
 
-For å lære om Ansible Vault og LastPass-integrasjonen, se
+For å lære om Ansible Vault, se
 [ansible-vault-guide](ansible-vault-guide.md).
 
 For grunnleggende Git-kommandoer og arbeidsflyter, se
@@ -89,7 +89,7 @@ source .venv/bin/activate
 **Installer pakker:**
 
 ```bash
-pip install mkdocs
+pip install zensical
 # eller fra en requirements.txt fil
 pip install -r requirements.txt
 ```

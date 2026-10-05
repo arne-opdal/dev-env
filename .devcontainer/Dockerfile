@@ -1,15 +1,9 @@
 FROM python:3.12-slim
 
-# Install basic tools including bash-completion and build dependencies for lastpass-cli
+# Install basic tools including bash-completion
 RUN apt-get update && apt-get install -y \
     git \
     bash-completion \
-    build-essential \
-    cmake \
-    libcurl4-openssl-dev \
-    libxml2-dev \
-    libssl-dev \
-    pkg-config \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 

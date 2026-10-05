@@ -1,5 +1,5 @@
 {
-    "name": "Dev-setup",
+    "name": "Dev-env",
     "build": {
         "dockerfile": "Dockerfile",
         "args": {

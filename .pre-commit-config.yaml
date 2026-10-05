@@ -14,7 +14,6 @@ repos:
       - id: check-yaml
         name: Check YAML syntax
         args: ['--allow-multiple-documents']
-        exclude: ^mkdocs\.yml$
       - id: check-added-large-files
         name: Check for large files
         args: ['--maxkb=1000']
@@ -50,7 +49,7 @@ repos:
         name: Lint Ansible files
         language_version: python3.12
         files: \.(yaml|yml)$
-        exclude: ^(\.github/|mkdocs\.yml|\.pre-commit-config\.yaml|\.markdownlint\.yaml|\.ansible-lint)
+        exclude: ^(\.github/|\.pre-commit-config\.yaml|\.markdownlint\.yaml|\.ansible-lint)
         args:
           - --profile=production
           - --strict
