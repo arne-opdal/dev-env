@@ -1,0 +1,22 @@
+# code: language=ansible
+---
+- name: Testing encrypted variables
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Show user
+      ansible.builtin.debug:
+        msg: "USER: {{ USER }}"
+
+    - name: Show password
+      ansible.builtin.debug:
+        msg: "PASSWORD: {{ PASSWORD }}"
+
+    - name: Show netbox api
+      ansible.builtin.debug:
+        msg: "NETBOX_API: {{ NETBOX_API }}"
+
+    - name: Show netbox token
+      ansible.builtin.debug:
+        msg: "NETBOX_TOKEN: {{ NETBOX_TOKEN }}"

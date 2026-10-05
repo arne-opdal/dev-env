@@ -1,0 +1,4 @@
+# Variables for group grp1
+---
+USER: grp1_user
+PASSWORD: "{{ vault_PASSWORD }}"

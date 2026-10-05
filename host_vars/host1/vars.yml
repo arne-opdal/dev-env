@@ -1,0 +1,4 @@
+# Variables for host1
+---
+USER: host1_user
+PASSWORD: "{{ vault_PASSWORD }}"

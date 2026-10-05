@@ -1,0 +1,56 @@
+---
+# Pre-commit hooks for code quality and consistency
+# See https://pre-commit.com for more information
+
+repos:
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        name: Trim trailing whitespace
+      - id: end-of-file-fixer
+        name: Fix end of files
+      - id: check-yaml
+        name: Check YAML syntax
+        args: ['--allow-multiple-documents']
+        exclude: ^mkdocs\.yml$
+      - id: check-added-large-files
+        name: Check for large files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+        name: Check for merge conflicts
+      - id: mixed-line-ending
+        name: Fix mixed line endings
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.46.0
+    hooks:
+      - id: markdownlint
+        name: Lint Markdown files
+        args: ['--fix', '--disable', 'MD013', 'MD033', 'MD041']
+        # MD013: Line length (disabled - can be too strict)
+        # MD033: Inline HTML (disabled - useful in docs)
+        # MD041: First line in file should be a top level heading (disabled)
+
+  # Conventional Commits
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.6.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: []
+
+  # Ansible linting
+  - repo: https://github.com/ansible/ansible-lint
+    rev: v25.11.0
+    hooks:
+      - id: ansible-lint
+        name: Lint Ansible files
+        language_version: python3.12
+        files: \.(yaml|yml)$
+        exclude: ^(\.github/|mkdocs\.yml|\.pre-commit-config\.yaml|\.markdownlint\.yaml|\.ansible-lint)
+        args:
+          - --profile=production
+          - --strict

@@ -1,0 +1,23 @@
+{
+    "name": "Dev-setup",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {
+            "USER_UID": "1000",
+            "USER_GID": "1000"
+        }
+    },
+    "containerUser": "vscode",
+    "updateRemoteUserUID": true,
+    "postCreateCommand": "bash .devcontainer/post-create.sh",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash"
+            },
+            "extensions": [
+                "ms-python.python"
+            ]
+        }
+    }
+}

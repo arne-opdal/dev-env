@@ -1,0 +1,5 @@
+# Variables that are common to all environments
+---
+NETBOX_API: https://url-to-netbox
+NETBOX_TOKEN: "{{ vault_NETBOX_TOKEN }}"
+TFTP_SERVER: 172.16.3.15

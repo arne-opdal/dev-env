@@ -1,0 +1,32 @@
+---
+# Ansible-lint configuration
+# See https://ansible.readthedocs.io/projects/lint/configuring/
+
+profile: production  # Rules for production-ready Ansible content
+
+# Exclude specific paths
+exclude_paths:
+  - .github/
+  - .devcontainer/
+  - docs/
+  - venv/
+  - .venv/
+  - collections/
+  - mkdocs.yml
+  - .markdownlint.yaml
+  - .pre-commit-config.yaml
+
+# Skip specific rules if needed
+# skip_list:
+  # Add rule IDs here to skip them, for example:
+  # - yaml[line-length]  # Skip line length checks in YAML
+  # - name[casing]       # Skip task name casing checks
+
+# Enable offline mode (don't check for newer versions)
+offline: false
+
+# Use parseable format for better CI/CD integration
+# parseable: true
+
+# Set verbosity level (0-2)
+# verbosity: 1
