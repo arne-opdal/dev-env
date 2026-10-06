@@ -61,20 +61,20 @@ cd /path/to/your/project
 git init
 
 # Legg til en fjern-repository (remote)
-git remote add origin https://github.com/brukernavn/repo-navn.git
+git remote add origin https://git.example.com/brukernavn/repo-navn.git
 ```
 
 ### Klon eksisterende repository
 
 ```bash
 # Klon via HTTPS
-git clone https://github.com/brukernavn/repo-navn.git
+git clone https://git.example.com/brukernavn/repo-navn.git
 
 # Klon via SSH (anbefalt)
-git clone git@github.com:brukernavn/repo-navn.git
+git clone git@git.example.com:brukernavn/repo-navn.git
 
 # Klon til spesifikk mappe
-git clone https://github.com/brukernavn/repo-navn.git min-mappe
+git clone https://git.example.com/brukernavn/repo-navn.git min-mappe
 ```
 
 ---
@@ -443,10 +443,10 @@ git commit -m "Oppdatert .gitignore"
 git remote -v
 
 # Legg til remote
-git remote add origin https://github.com/brukernavn/repo.git
+git remote add origin https://git.example.com/brukernavn/repo.git
 
 # Endre remote URL
-git remote set-url origin git@github.com:brukernavn/repo.git
+git remote set-url origin git@git.example.com:brukernavn/repo.git
 
 # Fjern remote
 git remote remove origin
@@ -553,8 +553,8 @@ git commit -m "Implementert ny funksjon"
 # 4. Push til remote
 git push -u origin feature-ny-funksjon
 
-# 5. Opprett Pull Request på GitHub/GitLab
-# (gjøres i web-grensesnittet)
+# 5. Opprett Pull Request / Merge Request
+# (gjøres i web-grensesnittet til Git-serveren)
 
 # 6. Etter godkjenning og merge, oppdater main
 git checkout main
@@ -726,6 +726,6 @@ git push -f origin branch-navn
 
 - [Offisiell Git-dokumentasjon](https://git-scm.com/doc)
 - [Pro Git bok (gratis)](https://git-scm.com/book/en/v2)
-- [GitHub Git Cheat Sheet](https://training.github.com/downloads/github-git-cheat-sheet/)
+- [Git Cheat Sheet](https://git-scm.com/cheat-sheet)
 - [Visualizing Git](https://git-school.github.io/visualizing-git/)
 - [Learn Git Branching (interaktiv)](https://learngitbranching.js.org/)

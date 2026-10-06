@@ -14,9 +14,6 @@ For grunnleggende Git-kommandoer og arbeidsflyter, se
 For å lære om Fork vs. Branch workflows og Pull Requests, se
 [git-workflows](git-workflows.md).
 
-For å lære om automatisk deployment av dokumentasjon med GitHub Actions, se
-[github-actions-deploy](github-actions-deploy.md).
-
 For vedlikehold og opprydding av Docker, se
 [docker-vedlikehold](docker-vedlikehold.md).
 
@@ -25,9 +22,6 @@ For å lære om pre-commit hooks for kodekvalitet, se
 
 For å lære om Conventional Commits og versjonshåndtering, se
 [conventional-commits](conventional-commits.md).
-
-For å fikse GitHub branch protection med automatisk release, se
-[github-branch-protection](github-branch-protection.md).
 
 Dette oppsettet laget for å forenkle deling av kode mest mulig. Og ikke minst at
 kjøremiljøet skal være enkelt å holde konsistent fra PC til PC.

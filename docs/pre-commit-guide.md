@@ -140,7 +140,6 @@ Konfigurasjon for Ansible linting:
 ```yaml
 profile: production
 exclude_paths:
-  - .github/
   - docs/
 skip_list:
   # Add rules to skip here
@@ -176,7 +175,7 @@ repos:
   # ...eksisterende repos
 
   # Nytt repo
-  - repo: https://github.com/username/repo
+  - repo: https://git.example.com/username/repo
     rev: v1.0.0
     hooks:
       - id: hook-id
@@ -337,15 +336,6 @@ skip_list:
 ## CI/CD Integrasjon
 
 Pre-commit kan kjøres i CI/CD pipelines:
-
-### GitHub Actions
-
-```yaml
-- name: Run pre-commit
-  run: |
-    pip install pre-commit
-    pre-commit run --all-files
-```
 
 ### GitLab CI
 

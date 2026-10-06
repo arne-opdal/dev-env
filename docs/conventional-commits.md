@@ -2,7 +2,7 @@
 
 ## Oversikt
 
-Dette prosjektet bruker [Conventional Commits](https://www.conventionalcommits.org/) for strukturerte commit-meldinger og automatisk release-håndtering via GitHub Actions.
+Dette prosjektet bruker [Conventional Commits](https://www.conventionalcommits.org/) for strukturerte commit-meldinger og semantisk versjonering. Versjonen oppdateres manuelt i `VERSION`-filen.
 
 ## Hva er Conventional Commits?
 
@@ -131,102 +131,59 @@ git push origin main
 git push origin v0.2.0
 ```
 
-3. **GitHub Actions oppretter automatisk release**
+### Velge neste versjon
 
-## GitHub Actions Release Workflow
+Commit-typene siden forrige tag forteller hvilket versjonsnummer som skal økes:
 
-Workflowen (`.github/workflows/release.yml`) kjører automatisk når du pusher til main-branchen.
+- **BREAKING CHANGE** eller `type!:` → MAJOR (1.0.0 → 2.0.0)
+- **feat:** → MINOR (1.0.0 → 1.1.0)
+- **fix:** → PATCH (1.0.0 → 1.0.1)
+- Andre typer (docs, chore, etc.) → ingen ny versjon nødvendig
 
-### Automatisk versjonering
-
-Workflowen analyserer commits siden siste tag og bestemmer automatisk ny versjon:
-
-- **BREAKING CHANGE** eller `type!:` → MAJOR bump (1.0.0 → 2.0.0)
-- **feat:** → MINOR bump (1.0.0 → 1.1.0)
-- **fix:** → PATCH bump (1.0.0 → 1.0.1)
-- Andre typer (docs, chore, etc.) → Ingen release
-
-### Workflow-steg
-
-1. **Trigger**: Når du pusher til main (ignorerer docs og markdown)
-2. **Analyserer commits**: Siden siste tag
-3. **Beregner ny versjon**: Basert på Conventional Commits
-4. **Oppdaterer VERSION-fil**: Automatisk commit med `[skip ci]`
-5. **Oppretter tag**: Med ny versjon (f.eks. `v0.2.0`)
-6. **Genererer changelog**: Kategorisert etter type
-7. **Oppretter GitHub Release**: Med changelog
-
-### Hvordan lage en release
-
-Det er nå mye enklere! Du trenger bare å pushe commits til main:
+Se hvilke commits som er kommet siden forrige tag:
 
 ```bash
-# 1. Gjør endringer og commit med Conventional Commits
-git add .
-git commit -m "feat: legg til ny funksjonalitet"
-
-# 2. Push til main
-git push origin main
-
-# 3. GitHub Actions gjør resten automatisk:
-#    - Oppdaterer VERSION-fil
-#    - Oppretter tag
-#    - Lager release med changelog
+git log $(git describe --tags --abbrev=0)..HEAD --oneline
 ```
 
-### Eksempel på automatisk versjonering
+Finnes det ingen tag ennå, bruk `git log --oneline`.
+
+### Eksempel
 
 ```bash
-# Scenario 1: Feature (minor bump)
-$ git commit -m "feat: legg til zensical support"
-$ git push origin main
-# → Versjon 0.1.0 → 0.2.0
-# → Tag v0.2.0 opprettet
-# → Release generert
+$ git log v0.1.0..HEAD --oneline
+a1b2c3d fix: rett opp ssh-agent forwarding
+d4e5f6a feat: legg til zensical support
+0a1b2c3 docs: oppdater guide
 
-# Scenario 2: Bugfix (patch bump)
-$ git commit -m "fix: rett opp ssh-agent forwarding"
-$ git push origin main
-# → Versjon 0.2.0 → 0.2.1
-# → Tag v0.2.1 opprettet
-# → Release generert
-
-# Scenario 3: Breaking change (major bump)
-$ git commit -m "feat!: endre til Python 3.12"
-$ git push origin main
-# → Versjon 0.2.1 → 1.0.0
-# → Tag v1.0.0 opprettet
-# → Release generert
-
-# Scenario 4: Dokumentasjon (ingen release)
-$ git commit -m "docs: oppdater guide"
-$ git push origin main
-# → Ingen versjonsbump
-# → Ingen release
+# feat: er den "største" endringen → MINOR bump
+# 0.1.0 → 0.2.0
 ```
 
 ### Changelog-kategorier
 
-Workflowen genererer automatisk kategorisert changelog:
+Commit-typene gjør det enkelt å skrive en kategorisert changelog for hver versjon:
 
 ```markdown
-## Changes
+## 0.2.0
 
-### 🚨 Breaking Changes
+### Breaking Changes
 - feat!: endre til Python 3.12
 
-### ✨ Features
+### Features
 - feat: legg til zensical support
 - feat(docker): forbedre volume mounting
 
-### 🐛 Bug Fixes
+### Bug Fixes
 - fix: ssh-agent forwarding issue
 - fix(ansible): vault password handling
 
-### 🔧 Other Changes
+### Other Changes
 - chore: oppdater dependencies
 - docs: legg til guide
 ```
+
+Dette kan senere automatiseres i en CI/CD-pipeline på Git-serveren.
 
 ## Pre-commit Hook for Conventional Commits
 
@@ -277,10 +234,10 @@ git commit -m "docs: legg til guide for xyz"
 # 4. Push
 git push origin main
 
-# Ingen release siden det er kun docs
+# Ingen ny versjon siden det er kun docs
 ```
 
-### Endring som lager release
+### Endring som gir ny versjon
 
 ```bash
 # 1. Implementer ny funksjonalitet
@@ -293,13 +250,13 @@ git commit -m "feat: legg til deployment playbook"
 # 3. Push til main
 git push origin main
 
-# 4. GitHub Actions kjører automatisk og:
-#    - Oppdager feat: commit
-#    - Bumper MINOR version (0.1.0 → 0.2.0)
-#    - Oppdaterer VERSION-fil
-#    - Oppretter tag v0.2.0
-#    - Genererer changelog
-#    - Lager GitHub Release
+# 4. feat: betyr MINOR bump (0.1.0 → 0.2.0)
+echo "0.2.0" > VERSION
+git add VERSION
+git commit -m "chore: bump version to 0.2.0"
+git tag -a v0.2.0 -m "Release v0.2.0"
+git push origin main
+git push origin v0.2.0
 ```
 
 ## Beste praksis
@@ -391,7 +348,7 @@ git commit --amend -m "feat: korrekt melding"
 | `git commit -m "fix: description"` | Bugfix commit (PATCH bump) |
 | `git commit -m "feat!: description"` | Breaking change (MAJOR bump) |
 | `git commit -m "docs: description"` | Dokumentasjon (ingen release) |
-| `git push origin main` | Trigger automatisk release (hvis relevant) |
+| `git tag -a v0.2.0 -m "Release v0.2.0"` | Lag tag for ny versjon |
 | `cat VERSION` | Se gjeldende versjon |
 | `git tag` | Se alle tags/releases |
 | `pre-commit run --all-files` | Test commits lokalt |
@@ -400,5 +357,4 @@ git commit --amend -m "feat: korrekt melding"
 
 - [Conventional Commits spesifikasjon](https://www.conventionalcommits.org/)
 - [Semantic Versioning](https://semver.org/)
-- [GitHub Releases](https://docs.github.com/en/repositories/releasing-projects-on-github)
 - [Keep a Changelog](https://keepachangelog.com/)

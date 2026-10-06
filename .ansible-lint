@@ -6,7 +6,6 @@ profile: production  # Rules for production-ready Ansible content
 
 # Exclude specific paths
 exclude_paths:
-  - .github/
   - .devcontainer/
   - docs/
   - venv/

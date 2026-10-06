@@ -4,6 +4,16 @@
 
 Det finnes to hovedstrategier for å bidra til Git-prosjekter: **Fork & Pull Request** (vanlig i open source) og **Branch & Pull Request** (vanlig i organisasjoner). Denne guiden forklarer begge.
 
+Arbeidsflyten er den samme uansett hvilken Git-plattform du bruker (GitHub, GitLab, Gitea/Forgejo, Bitbucket, Azure DevOps osv.). Det som skiller er navn og plassering av knapper i web-grensesnittet:
+
+| Begrep i denne guiden | Andre navn |
+|-----------------------|------------|
+| Pull Request (PR) | Merge Request (MR) i GitLab |
+| Fork | Fork / kopi av repository |
+| Reviewer | Approver / godkjenner |
+
+Eksemplene bruker `git.example.com` som Git-server. Bytt ut med adressen til serveren dere bruker.
+
 ---
 
 ## 🍴 Fork & Pull Request Workflow
@@ -13,33 +23,33 @@ Det finnes to hovedstrategier for å bidra til Git-prosjekter: **Fork & Pull Req
 - Open source-prosjekter
 - Når du ikke har skrivetilgang til hovedrepoet
 - Eksterne bidragsytere
-- Offentlige prosjekter på GitHub
+- Offentlige prosjekter på en delt Git-plattform
 
 ### Steg-for-steg
 
 #### 1. Fork repoet
 
-På GitHub:
+I web-grensesnittet til Git-serveren:
 
 1. Gå til prosjektets repository
-2. Klikk **Fork** (øverst til høyre)
-3. Velg din bruker/organisasjon
-4. Vent mens GitHub lager en kopi
+2. Klikk **Fork**
+3. Velg din bruker/organisasjon/gruppe som mål
+4. Vent mens serveren lager en kopi
 
-Du har nå en kopi under `https://github.com/dinbruker/prosjektnavn`
+Du har nå en kopi under `https://git.example.com/dinbruker/prosjektnavn`
 
 #### 2. Clone din fork lokalt
 
 ```bash
 # Clone din fork (ikke original!)
-git clone https://github.com/dinbruker/prosjektnavn.git
+git clone https://git.example.com/dinbruker/prosjektnavn.git
 cd prosjektnavn
 
 # Sjekk remote
 git remote -v
 # output:
-# origin  https://github.com/dinbruker/prosjektnavn.git (fetch)
-# origin  https://github.com/dinbruker/prosjektnavn.git (push)
+# origin  https://git.example.com/dinbruker/prosjektnavn.git (fetch)
+# origin  https://git.example.com/dinbruker/prosjektnavn.git (push)
 ```
 
 #### 3. Legg til upstream remote
@@ -48,15 +58,15 @@ Dette lar deg holde din fork oppdatert med original-repoet:
 
 ```bash
 # Legg til original repo som "upstream"
-git remote add upstream https://github.com/original-owner/prosjektnavn.git
+git remote add upstream https://git.example.com/original-owner/prosjektnavn.git
 
 # Verifiser
 git remote -v
 # output:
-# origin    https://github.com/dinbruker/prosjektnavn.git (fetch)
-# origin    https://github.com/dinbruker/prosjektnavn.git (push)
-# upstream  https://github.com/original-owner/prosjektnavn.git (fetch)
-# upstream  https://github.com/original-owner/prosjektnavn.git (push)
+# origin    https://git.example.com/dinbruker/prosjektnavn.git (fetch)
+# origin    https://git.example.com/dinbruker/prosjektnavn.git (push)
+# upstream  https://git.example.com/original-owner/prosjektnavn.git (fetch)
+# upstream  https://git.example.com/original-owner/prosjektnavn.git (push)
 ```
 
 #### 4. Hold din fork oppdatert
@@ -117,13 +127,13 @@ git push origin feature/min-nye-funksjon
 
 #### 8. Opprett Pull Request
 
-På GitHub:
+I web-grensesnittet til Git-serveren:
 
-1. Gå til **din fork** (`https://github.com/dinbruker/prosjektnavn`)
-2. Klikk **Compare & pull request** (gul banner)
+1. Gå til **din fork** (`https://git.example.com/dinbruker/prosjektnavn`)
+2. Velg å opprette en ny Pull Request / Merge Request. De fleste plattformer viser et forslag rett etter at du har pushet en ny branch.
 3. Sjekk at retningen er riktig:
-    - **base repository**: `original-owner/prosjektnavn` base: `main`
-    - **head repository**: `dinbruker/prosjektnavn` compare: `feature/min-nye-funksjon`
+    - **Mål (target/base)**: `original-owner/prosjektnavn`, branch `main`
+    - **Kilde (source/head)**: `dinbruker/prosjektnavn`, branch `feature/min-nye-funksjon`
 4. Fyll ut PR-beskrivelse:
 
 ```markdown
@@ -143,7 +153,7 @@ Legger til ny funksjon for å...
 - [x] Conventional commits brukt
 ```
 
-5. Klikk **Create pull request**
+5. Opprett Pull Request / Merge Request
 
 #### 9. Håndter review-kommentarer
 
@@ -220,14 +230,14 @@ git push origin main
 
 ```bash
 # Clone repoet direkte
-git clone https://github.com/organisasjon/prosjektnavn.git
+git clone https://git.example.com/organisasjon/prosjektnavn.git
 cd prosjektnavn
 
 # Sjekk remote
 git remote -v
 # output:
-# origin  https://github.com/organisasjon/prosjektnavn.git (fetch)
-# origin  https://github.com/organisasjon/prosjektnavn.git (push)
+# origin  https://git.example.com/organisasjon/prosjektnavn.git (fetch)
+# origin  https://git.example.com/organisasjon/prosjektnavn.git (push)
 ```
 
 #### 2. Oppdater main branch
@@ -276,16 +286,16 @@ git push -u origin feature/min-nye-funksjon
 
 #### 6. Opprett Pull Request
 
-På GitHub:
+I web-grensesnittet til Git-serveren:
 
 1. Gå til repository
-2. Klikk **Compare & pull request**
-3. Base: `main` ← Compare: `feature/min-nye-funksjon`
+2. Velg å opprette en ny Pull Request / Merge Request
+3. Mål: `main` ← Kilde: `feature/min-nye-funksjon`
 4. Fyll ut beskrivelse
-5. Assign reviewers (teammedlemmer)
+5. Legg til reviewers (teammedlemmer)
 6. Legg til labels (bug, enhancement, etc.)
 7. Link issues hvis relevant (#123)
-8. Klikk **Create pull request**
+8. Opprett Pull Request / Merge Request
 
 #### 7. Håndter review og merge
 
@@ -519,21 +529,20 @@ git push --force-with-lease
 
 Prøv dette på et test-repo:
 
-1. Fork et public GitHub-repo (f.eks. aopdal/dev-setup)
+1. Fork et test-repo på Git-serveren dere bruker (f.eks. dette repoet)
 2. Clone din fork
 3. Legg til upstream remote
 4. Opprett feature branch
 5. Gjør en liten endring (f.eks. README typo)
 6. Commit med conventional commit message
 7. Push til din fork
-8. Opprett PR
+8. Opprett Pull Request / Merge Request
 9. Etter merge: sync fork
 
 ---
 
 ## 📚 Videre Lesning
 
-- [GitHub Fork Docs](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
 - [Atlassian Git Workflows](https://www.atlassian.com/git/tutorials/comparing-workflows)
 - [Conventional Commits](https://www.conventionalcommits.org/)
 - `git-basics.md` - Grunnleggende Git-kommandoer

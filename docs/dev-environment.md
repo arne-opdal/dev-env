@@ -195,8 +195,8 @@ cd code
 clone repoet med:
 
 ```bash
-git clone https://github.com/aopdal/dev-setup.git
-cd dev-setup
+git clone https://git.opdal.net/arne/dev-env.git
+cd dev-env
 ```
 
 Nå skal det være mulig å starte opp VSCode direkte fra linux.

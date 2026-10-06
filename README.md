@@ -19,7 +19,6 @@ Dette er et **opplæringsmiljø** med bevisste trade-offs for pedagogikk:
 - Secret management med Ansible Vault
 - Pre-commit hooks for automatisk kvalitetskontroll
 - Conventional Commits og semantic versioning
-- CI/CD med GitHub Actions
 - Infrastructure as Code
 
 ⚠️ **Lab-konfigurasjoner (IKKE for produksjon):**
@@ -142,14 +141,11 @@ Alle guider er på norsk og dekker:
 ### Ansible & Secrets
 - [Ansible Vault Guide](docs/ansible-vault-guide.md) - Håndtering av hemmeligheter med Ansible Vault
 - [Security Assessment](docs/security-assessment.md) - Full security review (lab vs. produksjon)
-- [Critical Fixes](docs/CRITICAL-FIXES.md) - Viktige sikkerhetspunkter
 
 ### Git & Automation
 - [Git Basics](docs/git-basics.md) - Grunnleggende Git-kommandoer
 - [Pre-commit Guide](docs/pre-commit-guide.md) - Automatisk kodekvalitet
 - [Conventional Commits](docs/conventional-commits.md) - Commit-format og versjonering
-- [GitHub Actions Deploy](docs/github-actions-deploy.md) - CI/CD deployment
-- [GitHub Branch Protection](docs/github-branch-protection.md) - Branch protection setup
 
 ---
 
@@ -159,7 +155,6 @@ Alle guider er på norsk og dekker:
 - **Ansible Vault**: Mønster for hemmeligheter (`vars.yml` + `vault.yml`), klart for kryptering
 - **Pre-commit hooks**: Automatisk linting og validation
 - **Comprehensive .gitignore**: Beskytter mot credential leaks
-- **Branch protection**: PAT-basert CI/CD
 
 ### ⚠️ Før produksjon
 Disse endringene MÅ gjøres før produksjonsbruk:

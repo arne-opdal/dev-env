@@ -1,7 +1,7 @@
-# Security Assessment Report: aopdal/dev-setup
+# Security Assessment Report: dev-env
 
-**Date:** 24. november 2025
-**Repository:** github.com/aopdal/dev-setup
+**Dato:** 6. oktober 2026
+**Repository:** git.opdal.net/arne/dev-env
 **Vurdert av:** Security Review
 **Formål:** Opplæringsmiljø for nettverkskonsulenter i DevOps og nettverksautomasjon
 
@@ -11,57 +11,61 @@
 
 Samlet sikkerhetsvurdering: **GOD for opplæring** ✅ | **FORBEDRING NØDVENDIG for produksjon** ⚠️
 
-Dette repoet er designet som et **praktisk opplæringsmiljø** for nettverkskonsulenter som trenger trening i DevOps-basert drift og nettverksautomasjon. Security assessment tar hensyn til:
+Dette repoet er et **praktisk opplæringsmiljø** for nettverkskonsulenter som trenger trening i DevOps-basert drift og nettverksautomasjon. Vurderingen tar hensyn til:
 
 - 📚 **Pedagogisk verdi** vs. produksjonssikkerhet
 - 🎓 **Læringskurve** for personer uten DevOps-erfaring
 - 🛡️ **Sikkerhetspraksis** som kan tas med til produksjon
 - ⚠️ **Tydelig skille** mellom lab-oppsett og produksjon
 
-### 🎯 OPPLÆRINGSMILJØ - NÅVÆRENDE STATUS
+Miljøet er bevisst holdt enkelt: ingen eksterne tjenester for hemmeligheter, ingen CI/CD og ingen automatisk publisering. Alt kjører lokalt i en DevContainer.
 
-✅ **UTMERKEDE OPPLÆRINGSPRAKSIS:**
+### 🎯 NÅVÆRENDE STATUS
 
-- Ansible Vault-mønster for hemmeligheter (beste praksis)
-- Pre-commit hooks for kodekvalitet (DevOps standard)
-- Conventional Commits og automatisk versjonering (moderne workflow)
-- Omfattende dokumentasjon på norsk (tilgjengelig for målgruppen)
-- .gitignore beskytter mot vanlige feil
+✅ **GOD OPPLÆRINGSPRAKSIS:**
+
+- Ansible Vault-mønster for hemmeligheter (`vars.yml` + `vault.yml`)
+- Pre-commit hooks for kodekvalitet (markdownlint, ansible-lint, filsjekker)
+- Conventional Commits validert lokalt ved hver commit
+- Omfattende dokumentasjon på norsk (bygges lokalt med Zensical)
+- `.gitignore` beskytter `.env` og `.vault_pass`
+- Minimal container: kun `git`, `bash-completion`, `ca-certificates` og `libatomic1` installert utover base-imaget
 
 ⚠️ **BEVISSTE TRADE-OFFS FOR OPPLÆRING:**
 
-- SSH host key checking deaktivert (OK i lab, dokumentert risiko)
-- Passwordless sudo i container (praktisk for læring, risikofritt i isolert miljø)
-- Ukrypterte vault-filer (kun dummy-verdier, enkelt å øve på kryptering)
-- Debug-playbooks som viser secrets (pedagogisk verktøy, klart merket)
+- Ukrypterte vault-filer (kun dummy-verdier, studentene øver selv på kryptering)
+- Passwordless sudo i container (praktisk for læring, begrenset til containeren)
+- SSH host key checking deaktivert (inventoryet bruker i dag kun `ansible_connection=local`)
+- Debug-playbooks som viser hemmeligheter (pedagogisk verktøy, klart merket)
+- Unpinned/åpne avhengigheter (får nyeste versjoner)
 
 🚨 **FORBEDRINGER FØR PRODUKSJON:**
 
-- Pin Docker image til spesifikk versjon
-- Pin Python package-versjoner
+- Krypter alle vault-filer og lagre vault-passordet i en passordhåndterer
+- Slett debug-playbooks
+- Pin Docker-image og Python-pakker
 - Aktiver SSH host key checking
-- Vurder sudo-begrensninger
-- Legg til dependency scanning
+- Begrens sudo
+- Legg til sårbarhetsskanning
 
 ---
 
 ## 🎓 OPPLÆRINGSPERSPEKTIV
 
-Dette repoet balanserer pedagogikk med sikkerhet. Her er vurderingen fra et opplæringsperspektiv:
-
 ### ✅ HVA SOM ER BRA FOR OPPLÆRING
 
 #### 1. **Realistisk, men trygt miljø**
 
-- DevContainer isolerer risiko fra vertssystem
+- DevContainer isolerer risiko fra vertssystemet
+- Inventoryet kjører mot `localhost` (`ansible_connection=local`), så ingen ekte enheter berøres
 - Praktisk hands-on erfaring med reelle verktøy
-- Feilgjøring har lave konsekvenser (kun container påvirkes)
+- Feilgjøring har lave konsekvenser (kun containeren påvirkes)
 
 #### 2. **Gode sikkerhetsvaner innebygd**
 
-- **Ansible Vault** viser hvordan man håndterer hemmeligheter
+- **Ansible Vault** viser hvordan man skiller og beskytter hemmeligheter
 - **Pre-commit hooks** lærer automatisert kvalitetskontroll
-- **Git best practices** med conventional commits
+- **Git best practices** med Conventional Commits
 
 #### 3. **Tydelig dokumentasjon**
 
@@ -69,21 +73,21 @@ Dette repoet balanserer pedagogikk med sikkerhet. Her er vurderingen fra et oppl
 - Forklarer *hvorfor* ting gjøres på en bestemt måte
 - Skiller mellom lab-oppsett og produksjonsanbefalinger
 
-#### 4. **Progresiv læring**
+#### 4. **Progressiv læring**
 
-- Starter enkelt (basic Git, Ansible)
-- Bygger opp kompleksitet (CI/CD, automatisering)
-- Kan utvides til mer avanserte scenarioer
+- Starter enkelt (Git, Ansible, Vault i klartekst)
+- Bygger opp kompleksitet (kryptering, pre-commit, Conventional Commits)
+- Kan utvides med CI/CD og mer avanserte scenarioer senere
 
 ### ⚠️ TRADE-OFFS FOR PEDAGOGISK VERDI
 
 | Konfigurasjon | Lab-oppsett | Produksjonsanbefaling | Pedagogisk verdi |
 |---------------|-------------|----------------------|------------------|
-| `host_key_checking = False` | ✅ OK | ✅ Aktivér på prod-server | DevContainer-problem, ikke issue i prod |
+| Ukrypterte vault-filer | ✅ OK (dummy-verdier) | ❌ Krypter alltid | Lett å se sammenhengen, øve på `encrypt`/`decrypt` |
 | `NOPASSWD:ALL` sudo | ✅ OK | ⚠️ Begrens | Friksjonsfritt for eksperimentering |
+| `host_key_checking = False` | ✅ OK | ✅ Aktiver på prod-server | Ingen SSH-mål i dag, unngår problemer ved container-rebuild |
 | Debug-playbooks | ✅ OK | ❌ Fjern | Viser hvordan variabler fungerer |
 | Unpinned packages | ⚠️ Akseptabelt | ❌ Pin alt | Får nyeste versjoner, lettere å starte |
-| Ukrypterte vault-filer | ✅ OK (dummy-verdier) | ❌ Krypter alltid | Lett å se sammenhengen, øve på `encrypt`/`decrypt` |
 
 **Viktig:** Alle disse trade-offs er **bevisste valg** for opplæring og er **dokumentert** som ikke-produksjonsklare.
 
@@ -91,131 +95,178 @@ Dette repoet balanserer pedagogikk med sikkerhet. Her er vurderingen fra et oppl
 
 ## Detaljerte funn
 
-### ✅ POSITIVE SECURITY PRACTICES
+### ✅ POSITIVE SIKKERHETSPRAKSISER
 
 #### 1. **🔒 Ansible Vault-mønster for sensitive data**
 
 - **Status:** ✅ GOOD (for opplæring)
-- **Details:** Hemmeligheter ligger i egne vault-filer. I treningsmiljøet er de ukryptert og inneholder kun dummy-verdier.
+- **Detaljer:** Hemmeligheter ligger i egne vault-filer. I treningsmiljøet er de ukryptert og inneholder kun dummy-verdier.
 - **Struktur:**
 
-  ```
-  group_vars/all/vars.yml    # klartekst referanser
-  group_vars/all/vault.yml   # Hemmeligheter (krypteres i produksjon)
+  ```text
+  group_vars/all/vars.yml    # netbox_token: "{{ vault_netbox_token }}"
+  group_vars/all/vault.yml   # vault_netbox_token: netbox-token
   ```
 
 - **Hvorfor dette er bra:**
     - Standard Ansible beste praksis
-    - Tydelig separasjon mellom public og secret data
-    - Studentene øver selv på `ansible-vault encrypt`/`decrypt` med en lokal `.vault_pass`
+    - Tydelig separasjon mellom offentlige og hemmelige data
+    - Studentene oppretter selv `.vault_pass` og øver på `ansible-vault encrypt`/`decrypt`
+    - Ingen avhengighet til eksterne passordtjenester i treningsmiljøet
 - **Produksjonskrav:** Krypter alle vault-filer, og lagre vault-passordet i en passordhåndterer
 - **Produksjonsverdi:** ⭐⭐⭐⭐⭐ (Industri-standard når filene er kryptert)
 
-#### 2. **🛡️ Omfattende .gitignore (PRODUCTION-READY)**
+#### 2. **🛡️ .gitignore for hemmeligheter**
 
-- **Status:** ✅ EXCELLENT
-- **Highlights:**
+- **Status:** ✅ GOOD
+- **Utdrag:**
 
-```
-# Secrets og credentials
-.env
-.envrc
-.vault_pass
+  ```text
+  # Secrets og credentials
+  .env
+  .envrc
+  .vault_pass
 
-# SSH keys
-*.pem
-*.key
-*_rsa
-
-# Python environment
-.venv/
-__pycache__/
-```
+  # Python environment
+  .venv
+  __pycache__/
+  ```
 
 - **Hvorfor dette er bra:**
-    - Beskytter mot vanlige feil (committing .env files, etc.)
-    - Inkluderer Ansible-spesifikke filer (`.vault_pass`)
-    - Dekker Python, IDE, og cloud provider-filer
-- **Pedagogisk verdi:** Lærer studenter hva som IKKE skal commites
-- **Produksjonsverdi:** ⭐⭐⭐⭐⭐
+    - `.env` og `.vault_pass` opprettes lokalt i hver læringsøkt og kan ikke commites ved et uhell
+    - Dekker Python-, IDE- og cloud provider-filer
+- **Forbedring:** Legg til mønstre for private nøkler (`*.pem`, `*.key`, `id_rsa*`, `id_ed25519*`)
+- **Pedagogisk verdi:** Lærer studentene hva som IKKE skal commites
 
-#### 3. **🔨 Pre-commit Hooks for Code Quality (PRODUCTION-READY)**
+#### 3. **🔨 Pre-commit hooks for kodekvalitet**
 
 - **Status:** ✅ EXCELLENT
-- **Konfigurert hooks:**
+- **Konfigurerte hooks:**
+    - Filsjekker (trailing whitespace, EOF, YAML-syntaks, store filer, merge-konflikter)
     - Markdown linting (markdownlint)
-    - Ansible linting (ansible-lint production profile)
-    - Conventional Commits validation
-    - File cleanup (trailing whitespace, EOF, etc.)
+    - Ansible linting (ansible-lint, `production`-profil, `--strict`)
+    - Conventional Commits-validering (`commit-msg`)
+- **Installasjon:** Automatisk via `.devcontainer/post-create.sh`
 - **Hvorfor dette er bra:**
-    - Automatisk kvalitetskontroll før commit
+    - Automatisk kvalitetskontroll før hver commit, uten CI/CD
     - Lærer DevOps beste praksis tidlig
     - Hindrer vanlige feil
-- **Pedagogisk verdi:** ⭐⭐⭐⭐⭐ (Introduserer automation fra dag 1)
-- **Produksjonsverdi:** ⭐⭐⭐⭐⭐
+- **Begrensning:** Hooks kjører kun lokalt og kan omgås med `git commit --no-verify`. Uten CI finnes ingen sentral kontroll.
+- **Pedagogisk verdi:** ⭐⭐⭐⭐⭐ (Introduserer automatisering fra dag 1)
 
-#### 4. **📦 Conventional Commits & Automatic Versioning (PRODUCTION-READY)**
+#### 4. **📦 Conventional Commits**
 
-- **Status:** ✅ EXCELLENT
+- **Status:** ✅ GOOD
 - **Implementasjon:**
-    - Commit messages valideres mot Conventional Commits format
-    - GitHub Actions automatisk versjonering basert på commits
-    - Semantic versioning (MAJOR.MINOR.PATCH)
-    - Automatisk changelog generering
+    - Commit-meldinger valideres lokalt mot Conventional Commits-formatet
+    - Versjonen ligger i `VERSION` og oppdateres manuelt
 - **Hvorfor dette er bra:**
     - Lærer moderne Git-workflow
-    - Automatisert release management
-    - Tydelig versjonhistorikk
-- **Pedagogisk verdi:** ⭐⭐⭐⭐⭐ (Moderne DevOps praksis)
-- **Produksjonsverdi:** ⭐⭐⭐⭐⭐
+    - Tydelig og lesbar historikk
+    - Klargjør for automatisk versjonering og changelog hvis CI/CD innføres senere
 
-#### 5. **🐳 Non-Root Container User**
+#### 5. **🐳 Non-root container-bruker**
 
 - **Status:** ✅ GOOD
 - **Implementasjon:**
 
-```dockerfile
-USER $USERNAME  # vscode user, not root
-```
+  ```dockerfile
+  USER $USERNAME  # vscode-bruker, ikke root
+  ```
 
 - **Hvorfor dette er bra:**
     - Følger Docker security best practices
-    - Begrenser skade ved container escape
-    - Lærer security-by-default mentalitet
-- **Produksjonsverdi:** ⭐⭐⭐⭐⭐
+    - Begrenser skade ved feil eller kompromittering
+    - Lærer security-by-default
+- **Merk:** Effekten reduseres av passwordless sudo (se lab-konfigurasjoner)
 
-#### 6. **📦 Minimal Base Image**
+#### 6. **📦 Minimalt base-image**
 
 - **Status:** ✅ GOOD
-- **Implementasjon:** `python:3.12-slim`
-- **Hvorfor dette er bra:**
-    - Redusert attack surface
-    - Færre sårbarheter
-    - Raskere builds
-- **Produksjonsverdi:** ⭐⭐⭐⭐
+- **Implementasjon:** `python:3.12-slim` med kun nødvendige pakker:
 
-#### 7. **📚 Omfallende norsk dokumentasjon**
+  ```dockerfile
+  RUN apt-get update && apt-get install -y \
+      git \
+      bash-completion \
+      ca-certificates \
+      libatomic1 \
+      && rm -rf /var/lib/apt/lists/*
+  ```
+
+- **Hvorfor dette er bra:**
+    - Ingen kompilator/byggverktøy i imaget, redusert angrepsflate
+    - Færre pakker å holde oppdatert
+    - Raskere builds
+- **Merk:** `libatomic1` trengs av Node.js-binæren som pre-commit laster ned for markdownlint
+
+#### 7. **📚 Dokumentasjon på norsk**
 
 - **Status:** ✅ EXCELLENT for målgruppen
 - **Dokumentasjon:**
-    - Ansible Vault guide
-    - Git basics
-    - GitHub Actions deployment
-    - Docker maintenance
-    - Pre-commit hooks
-    - Conventional Commits
-    - Security practices
+    - Oppsett av PC og Docker-vedlikehold
+    - Ansible Vault
+    - Git, Git workflows, pre-commit og Conventional Commits
+    - Sikkerhetsbetraktninger (denne siden)
+- **Bygging:** Lokalt med `zensical serve` / `zensical build`. Ingen automatisk publisering.
 - **Hvorfor dette er bra:**
     - Senker terskelen for norske nettverkskonsulenter
     - Forklarer *hvorfor*, ikke bare *hvordan*
-    - Inkluderer sikkerhetsbetraktninger
-- **Pedagogisk verdi:** ⭐⭐⭐⭐⭐
+    - Dokumentasjon som kode, versjonert sammen med miljøet
 
 ---
 
 ## ⚠️ LAB-KONFIGURASJONER (OK for opplæring, ikke for produksjon)
 
-### 1. **SSH Host Key Checking Disabled**
+### 1. **Ukrypterte vault-filer**
+
+- **Konfigurasjon:** Alle `vault.yml` under `group_vars/` og `host_vars/` ligger i klartekst
+- **Innhold:** Kun dummy-verdier (`grp1_password`, `netbox-token` osv.)
+- **Hvorfor det er OK i lab:**
+    - Ingen ekte hemmeligheter
+    - Playbooks fungerer uten vault-passord fra første dag
+    - Studentene ser sammenhengen mellom `vars.yml` og `vault.yml` før de krypterer
+- **KRAV:** **Krypter alltid vault-filer i miljøer med ekte hemmeligheter!**
+
+#### 📋 Produksjonsanbefaling
+
+```bash
+ansible-vault encrypt group_vars/*/vault.yml host_vars/*/vault.yml
+```
+
+Vault-passordet hentes fra en passordhåndterer via et skript i `ANSIBLE_VAULT_PASSWORD_FILE`, eller fra hemmelighetslageret til automasjonsplattformen (AAP, Semaphore UI o.l.). Se [Ansible Vault-guiden](ansible-vault-guide.md).
+
+### 2. **Passwordless sudo (NOPASSWD:ALL)**
+
+- **Konfigurasjon:**
+
+  ```dockerfile
+  echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME
+  ```
+
+- **Risiko i produksjon:** ⚠️ MEDIUM - enhver prosess i containeren kan bli root
+- **Hvorfor det er OK i lab:**
+    - DevContainer er isolert fra vertssystemet
+    - Friksjonsfritt for pakkeinstallasjon og feilsøking
+    - Enklere for personer nye til Linux/containere
+- **Vurdering:** OK i DevContainer, men dokumenter risikoen
+
+#### 📋 Forbedringer for hardening
+
+```dockerfile
+# ALTERNATIV 1: Krev passord (sikrest)
+echo $USERNAME ALL=\(root\) ALL > /etc/sudoers.d/$USERNAME
+
+# ALTERNATIV 2: Begrens sudo til spesifikke kommandoer
+echo "$USERNAME ALL=(root) NOPASSWD: /usr/bin/apt-get" > /etc/sudoers.d/$USERNAME
+```
+
+```json
+// ALTERNATIV 3: devcontainer.json
+"runArgs": ["--security-opt=no-new-privileges"]
+```
+
+### 3. **SSH host key checking deaktivert**
 
 - **Konfigurasjon:**
 
@@ -224,91 +275,40 @@ USER $USERNAME  # vscode user, not root
   host_key_checking = False
   ```
 
-- **Kontekst:** Dette er et **DevContainer-spesifikt problem**
+- **Kontekst:** Inventoryet bruker i dag kun `ansible_connection=local`, så innstillingen har ingen effekt ennå. Den er satt for når studentene senere kobler til lab-enheter over SSH.
 - **Hvorfor deaktivert i DevContainer:**
-    - Container rebuilds ødelegger `~/.ssh/known_hosts`
-    - SSH agent forwarding fra host gjør key management komplisert
-    - Ephemeral container environment
-    - Pedagogisk fokus på Ansible, ikke SSH infrastruktur
-- **Pedagogisk verdi:** ✅ Lar studenter fokusere på Ansible-læring, ikke SSH troubleshooting
-- **Produksjonskontekst:** ⚠️ **Dette er IKKE et problem i produksjon!**
+    - Container-rebuild nullstiller `~/.ssh/known_hosts`
+    - Lab-enheter bygges ofte på nytt og får nye host keys
+    - Pedagogisk fokus på Ansible, ikke SSH-infrastruktur
 
-#### 🏢 Produksjonsscenario:
+#### 📋 Produksjonsanbefaling
 
-I produksjon kjøres Ansible fra **dedikerte servere** som:
-
-- **Ansible Automation Platform (AAP/Tower)**
-- **Semaphore UI**
-- **GitLab CI runners**
-- **Dedikert Ansible control node**
-
-Disse serverne har:
-
-- ✅ Persistent filsystem (known_hosts bevares)
-- ✅ Stabil SSH-konfigurasjon
-- ✅ Host key checking aktivert som standard
-- ✅ Ingen container rebuilds
-
-#### 📋 Produksjonsanbefaling:
+I produksjon kjøres Ansible fra **dedikerte servere** (AAP/Tower, Semaphore UI, CI-runnere eller en dedikert control node) med persistent filsystem. Der skal host key checking være aktivert:
 
 ```ini
-# ansible.cfg - PRODUCTION (på dedikert server)
+# ansible.cfg - PRODUKSJON
 [defaults]
-host_key_checking = True  # ✅ STANDARD - fungerer uten problemer
+host_key_checking = True
+```
 
-# First-time setup på produksjonsserver:
+```bash
+# Førstegangsoppsett på produksjonsserver
 ssh-keyscan -H target-host >> ~/.ssh/known_hosts
-# eller:
-ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook playbook.yml  # Kun første gang
 ```
 
-**Konklusjon:** Deaktivert host key checking er en **DevContainer limitation**, ikke en produksjonsrisiko. Produksjonsservere har ikke dette problemet.
-
-### 2. **Passwordless Sudo (NOPASSWD:ALL)**
-
-- **Konfigurasjon:**
-
-  ```dockerfile
-  echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME
-  ```
-
-- **Risiko i produksjon:** ⚠️ MEDIUM - Container escape kan gi root access
-- **Hvorfor det er OK i lab:**
-    - DevContainer er isolert fra vertssystem
-    - Friksjonsfritt for package installation og troubleshooting
-    - Enklere for personer nye til Linux/containers
-    - Begrenset til container-miljø
-- **Pedagogisk verdi:** ✅ Studenter kan eksperimentere uten sudo password
-- **Vurdering:** OK i DevContainer, men dokumenter risiko
-
-#### 📋 Forbedringer for hardening:
-
-```dockerfile
-# OPTION 1: Require password (most secure)
-echo $USERNAME ALL=\(root\) ALL > /etc/sudoers.d/$USERNAME
-
-# OPTION 2: Limit sudo to specific commands
-echo "$USERNAME ALL=(root) NOPASSWD: /usr/bin/apt-get, /usr/bin/systemctl" > /etc/sudoers.d/$USERNAME
-
-# OPTION 3: Use docker security options
-# Add to devcontainer.json:
-"runArgs": ["--security-opt=no-new-privileges"]
-```
-
-### 3. **Debug Playbooks that Display Secrets**
+### 4. **Debug-playbooks som viser hemmeligheter**
 
 - **Filer:**
     - `playbooks/debug/show-secrets-all.yml`
     - `playbooks/debug/show-vars-localhost.yml`
-- **Formål:** 🎓 Pedagogisk - viser hvordan Ansible Vault fungerer
-- **Risiko:** ⚠️ Kan lekke secrets til terminal/logs
+- **Formål:** 🎓 Pedagogisk - viser at variabler fra vault-filene blir lest riktig, både før og etter kryptering
+- **Risiko:** ⚠️ Kan lekke hemmeligheter til terminal/logger
 - **Hvorfor det er OK i lab:**
-    - Klart navngitt som DEBUG playbooks
-    - Nødvendig for å lære Ansible Vault
-    - Lab har ingen produksjonssecrets
-- **KRAV:** **FJERN eller beskyt i produksjon!**
+    - Klart navngitt som DEBUG-playbooks
+    - Lab har ingen ekte hemmeligheter
+- **KRAV:** **FJERN eller beskytt i produksjon!**
 
-#### 📋 Produksjonsanbefaling:
+#### 📋 Produksjonsanbefaling
 
 ```yaml
 # ALDRI i produksjon:
@@ -323,384 +323,285 @@ echo "$USERNAME ALL=(root) NOPASSWD: /usr/bin/apt-get, /usr/bin/systemctl" > /et
       - password is defined
       - password | length > 0
     fail_msg: "Password not configured"
-    # no_log: true  # ✅ Skjuler output
+  no_log: true  # ✅ Skjuler output
 ```
 
 ---
 
 ## 🚨 FORBEDRINGER FØR PRODUKSJON
 
-Disse endringene er **ikke kritiske for opplæring**, men **nødvendige for produksjon**:
+Disse endringene er **ikke kritiske for opplæring**, men **nødvendige for produksjon**.
 
-### 1. **Pin Docker Base Image Version (MEDIUM PRIORITY)**
+### 1. **Pin Docker base-image (MEDIUM)**
 
-- **Current State:**
-
-  ```dockerfile
-  FROM python:3.12-slim  # ⚠️ Floating tag
-  ```
-
-- **Risiko:** Image kan endres mellom builds, potensielle sårbarheter
-- **Production Fix:**
+- **Nåværende:**
 
   ```dockerfile
-  # RECOMMENDED: Pin til digest
-  FROM python:3.12-slim@sha256:abc123...  # ✅ Immutable
-
-  # MINIMUM: Pin til patch version
-  FROM python:3.12.7-slim  # ✅ Specific version
+  FROM python:3.12-slim  # ⚠️ Flytende tag
   ```
 
-- **Hvorfor ikke gjort ennå:** Opplæring trenger nyeste versjoner for best kompatibilitet
-- **Implementer:** Før deploying til produksjonsmiljø
+- **Risiko:** Imaget kan endres mellom builds
+- **Produksjonsfiks:**
 
-### 2. **Pin Python Package Versions (MEDIUM PRIORITY)**
+  ```dockerfile
+  # ANBEFALT: Pin til digest
+  FROM python:3.12-slim@sha256:abc123...
 
-- **Current State:**
+  # MINIMUM: Pin til patch-versjon
+  FROM python:3.12.7-slim
+  ```
 
-  ```txt
+### 2. **Pin Python-pakker (MEDIUM)**
+
+- **Nåværende:**
+
+  ```text
   # requirements.txt
-  ansible>=11.0.0  # ⚠️ Åpen versjon
   zensical
+  ansible-core>=2.19.10,<2.20.0
+  ansible-lint
   pre-commit
   ```
 
-- **Risiko:** Dependency hell, breaking changes ved updates
-- **Production Fix:**
+- **Risiko:** Uventede endringer ved ny rebuild av containeren
+- **Produksjonsfiks:** Lås eksakte versjoner, f.eks. med `pip freeze > requirements.txt` eller `pip-compile`
+- **Hvorfor ikke gjort ennå:** Studentene får nyeste versjoner automatisk
 
-  ```txt
-  # requirements.txt - PRODUCTION VERSION
-  ansible==11.1.0
-  zensical==0.0.67
-  pre-commit==4.0.1
+### 3. **Sårbarhetsskanning av avhengigheter (LAV-MEDIUM)**
 
-  # Generate with:
-  pip freeze > requirements.txt
+- **Nåværende:** Ingen automatisk skanning
+- **Uten CI/CD:** Kjør manuelt i containeren ved jevne mellomrom:
+
+  ```bash
+  pip install pip-audit
+  pip-audit -r requirements.txt
   ```
 
-- **Hvorfor ikke gjort ennå:** Lar studenter få nyeste features automatisk
-- **Implementer:** Før produksjon, og bruk Dependabot for oppdateringer
-
-### 3. **Legg til Dependency Scanning (LAV-MEDIUM PRIORITET)**
-
-- **Current State:** Ingen automatisk sårbarhetsskanning
-- **Production Recommendation:**
-
-  ```yaml
-  # .github/workflows/security.yml
-  name: Security Scan
-  on: [push, pull_request, schedule]
-
-  jobs:
-    dependency-scan:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-        - name: Run pip-audit
-          run: |
-            pip install pip-audit
-            pip-audit -r requirements.txt
-
-        - name: Scan Docker image
-          run: |
-            docker build -t local/devcontainer .devcontainer/
-            docker run --rm aquasec/trivy image local/devcontainer
+  ```bash
+  # Skann container-imaget (fra verten)
+  docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+    aquasec/trivy image <devcontainer-image>
   ```
 
-- **Alternativ:** Aktiver GitHub Dependabot
+- **Med CI/CD:** Legg de samme stegene inn i pipelinen, og vurder [Renovate](https://docs.renovatebot.com/) for automatiske oppdateringer. Renovate fungerer med de fleste Git-plattformer, også selvhostede.
 
-  ```yaml
-  # .github/dependabot.yml
-  version: 2
-  updates:
-    - package-ecosystem: "pip"
-      directory: "/"
-      schedule:
-        interval: "weekly"
+### 4. **Secrets-skanning (LAV)**
 
-    - package-ecosystem: "docker"
-      directory: "/.devcontainer"
-      schedule:
-        interval: "weekly"
-
-    - package-ecosystem: "github-actions"
-      directory: "/"
-      schedule:
-        interval: "weekly"
-  ```
-
-### 4. **Add Secrets Scanning (LOW PRIORITY)**
-
-- **Current State:** Manuell review av commits
-- **Production Recommendation:**
+- **Nåværende:** Kun `.gitignore` og manuell gjennomgang
+- **Anbefaling:** Legg til en pre-commit hook, så den kjører lokalt uten CI:
 
   ```yaml
   # .pre-commit-config.yaml
-  repos:
-    - repo: https://github.com/Yelp/detect-secrets
-      rev: v1.4.0
-      hooks:
-        - id: detect-secrets
-          args: ['--baseline', '.secrets.baseline']
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
   ```
 
-- **Setup:**
+- **Merk:** Med dummy-verdier i klartekst i vault-filene vil en slik skanner trenge unntak for `vault.yml` i treningsmiljøet.
 
-  ```bash
-  # Initialize baseline
-  pip install detect-secrets
-  detect-secrets scan > .secrets.baseline
+### 5. **Dokumenter sikkerhetsunntak (LAV)**
 
-  # Add to pre-commit
-  pre-commit install
-  ```
-
-### 5. **Document Security Exceptions (LOW PRIORITY)**
-
-- **Anbefaling:** Opprett `SECURITY.md` som forklarer:
-    - Hvilke lab-konfigurasjoner som ikke er produksjonsklare
-    - Hvordan rapportere sikkerhetsproblemer
-    - Checklist for produksjonsmiljø
-
-  ```markdown
-  # SECURITY.md
-
-  ## Lab vs Production
-
-  Dette er et **opplæringsmiljø**. Følgende konfigurasjoner er
-  **IKKE produksjonsklare**:
-
-  - [ ] SSH host key checking er deaktivert
-  - [ ] Passwordless sudo er aktivert
-  - [ ] Debug playbooks eksisterer
-  - [ ] Docker image ikke pinned
-  - [ ] Python packages ikke pinned
-
-  ## Før Produksjon
-
-  1. Aktiver SSH host key checking
-  2. Fjern/begrens passwordless sudo
-  3. Slett debug playbooks
-  4. Pin alle dependencies
-  5. Aktiver security scanning
-  6. Review alle secrets
-  ```
+- **Anbefaling:** Opprett `SECURITY.md` som lister lab-konfigurasjonene som ikke er produksjonsklare, og en sjekkliste for produksjon (se under).
 
 ---
 
 ## 🎯 SIKKERHETSPRAKSIS FOR OPPLÆRING
 
-### ✅ HVA STUDENTENE LÆRER (Production-Ready Skills)
+### ✅ HVA STUDENTENE LÆRER
 
-1. **Secret Management:**
-    - Ansible Vault for encrypting sensitive data
-    - Password manager for vault password i produksjon
-    - Environment variables vs plaintext files
-    - `.gitignore` for preventing credential leaks
+1. **Hemmelighetshåndtering:**
+    - Ansible Vault-mønsteret (`vars.yml` + `vault.yml`)
+    - Kryptering og dekryptering med `ansible-vault`
+    - Vault-passord i lokal fil (`.vault_pass`) og miljøvariabel
+    - `.gitignore` for å hindre lekkasje av hemmeligheter
+    - At produksjon krever passordhåndterer og krypterte filer
 
-2. **Code Quality Automation:**
-    - Pre-commit hooks for automated checks
-    - Markdown and Ansible linting
-    - Conventional Commits for clean history
-    - Automated versioning and releases
+2. **Automatisert kodekvalitet:**
+    - Pre-commit hooks
+    - Markdown- og Ansible-linting
+    - Conventional Commits for ryddig historikk
 
-3. **DevOps Workflow:**
-    - Git best practices
-    - CI/CD med GitHub Actions
+3. **DevOps-arbeidsflyt:**
+    - Git best practices, fork & branch-workflows
     - Infrastructure as Code (Ansible)
     - Documentation as Code (Zensical)
 
-4. **Container Security Basics:**
-    - Non-root users
-    - Minimal base images
-    - Image cleanup
+4. **Grunnleggende containersikkerhet:**
+    - Non-root brukere
+    - Minimale base-images
+    - Rydding av apt-cache i imaget
     - SSH agent forwarding
 
 ### ⚠️ HVA SOM MÅ ENDRES FOR PRODUKSJON
 
-1. **Ansible Hardening:**
-
-   ```ini
-   # ansible.cfg - PRODUCTION
-   [defaults]
-   host_key_checking = True          # ✅ Enable
-   retry_files_enabled = False       # ✅ Add
-
-   [privilege_escalation]
-   become_ask_pass = True            # ✅ Add
-   ```
-
-2. **Container Hardening:**
-
-   ```dockerfile
-   # Dockerfile - PRODUCTION
-   FROM python:3.12.7-slim@sha256:abc...  # ✅ Pin version
-
-   # Limit sudo
-   echo "$USERNAME ALL=(root) /usr/bin/apt-get" > /etc/sudoers.d/$USERNAME
-   ```
-
-3. **Dependency Management:**
-
-   ```txt
-   # requirements.txt - PRODUCTION
-   ansible==11.1.0        # ✅ Exact versions
-   zensical==0.0.67
-   pre-commit==4.0.1
-   ```
-
-4. **Remove Debug Tools:**
+1. **Hemmeligheter:**
 
    ```bash
-   # Delete before production
+   ansible-vault encrypt group_vars/*/vault.yml host_vars/*/vault.yml
+   ```
+
+2. **Ansible-hardening:**
+
+   ```ini
+   # ansible.cfg - PRODUKSJON
+   [defaults]
+   host_key_checking = True
+   retry_files_enabled = False
+
+   [privilege_escalation]
+   become_ask_pass = True
+   ```
+
+3. **Container-hardening:**
+
+   ```dockerfile
+   FROM python:3.12.7-slim@sha256:abc...
+   RUN echo "$USERNAME ALL=(root) /usr/bin/apt-get" > /etc/sudoers.d/$USERNAME
+   ```
+
+4. **Låste avhengigheter:**
+
+   ```text
+   # requirements.txt - PRODUKSJON
+   ansible-core==2.19.10
+   ansible-lint==25.11.0
+   pre-commit==4.0.1
+   zensical==0.0.67
+   ```
+
+5. **Fjern debug-verktøy:**
+
+   ```bash
    rm -rf playbooks/debug/
    ```
 
 ---
 
-## 📋 SECURITY CHECKLIST
+## 📋 SIKKERHETSSJEKKLISTE
 
-### 🎓 For Opplæringsmiljø (Current Status)
+### 🎓 Opplæringsmiljø (nåværende status)
 
-| Item | Status | Vurdering |
-|------|--------|-----------|
+| Punkt | Status | Vurdering |
+|-------|--------|-----------|
 | Ansible Vault-struktur | ✅ Implementert | Production-ready mønster |
 | Krypterte vault-filer | ⚠️ Ukryptert | **OK for lab, IKKE produksjon** |
-| Comprehensive .gitignore | ✅ Implementert | Production-ready |
-| Pre-commit hooks | ✅ Implementert | Production-ready |
-| Conventional Commits | ✅ Implementert | Production-ready |
-| Non-root container user | ✅ Implementert | Production-ready |
-| Norwegian documentation | ✅ Implementert | Excellent for target audience |
-| SSH host key checking | ⚠️ Deaktivert | **DevContainer-issue, OK i prod** |
+| `.gitignore` for `.env` / `.vault_pass` | ✅ Implementert | Production-ready |
+| `.gitignore` for private nøkler | ⚠️ Mangler | Anbefalt å legge til |
+| Pre-commit hooks | ✅ Implementert | Kun lokalt, kan omgås |
+| Conventional Commits | ✅ Implementert | Validert lokalt |
+| Non-root container-bruker | ✅ Implementert | Production-ready |
+| Minimalt container-image | ✅ Implementert | Ingen byggverktøy |
+| Norsk dokumentasjon | ✅ Implementert | Utmerket for målgruppen |
+| SSH host key checking | ⚠️ Deaktivert | **Ingen effekt i dag (kun local)** |
 | Passwordless sudo | ⚠️ Aktivert | **OK for lab, IKKE produksjon** |
-| Debug playbooks | ⚠️ Inkludert | **OK for læring, IKKE produksjon** |
-| Pinned dependencies | ⚠️ Mangler | **Må fikses før produksjon** |
-| Security scanning | ⚠️ Mangler | **Anbefalt for produksjon** |
+| Debug-playbooks | ⚠️ Inkludert | **OK for læring, IKKE produksjon** |
+| Låste avhengigheter | ⚠️ Mangler | **Må fikses før produksjon** |
+| Sårbarhetsskanning | ⚠️ Mangler | **Anbefalt for produksjon** |
+| CI/CD | ➖ Ikke i bruk | Bevisst utelatt i treningsversjonen |
 
-### 🏢 For Produksjonsmiljø (Required Changes)
+### 🏢 Produksjonsmiljø (nødvendige endringer)
 
-| Item | Status | Priority | Action |
-|------|--------|----------|--------|
-| Enable SSH host key checking | ✅ | N/A | Auto-enabled på prod-server |
-| Remove/limit passwordless sudo | ❌ | MEDIUM | Endre `Dockerfile` |
-| Delete debug playbooks | ❌ | HIGH | `rm -rf playbooks/debug/` |
-| Pin Docker image version | ❌ | MEDIUM | Endre `Dockerfile` |
-| Pin Python packages | ❌ | MEDIUM | Endre `requirements.txt` |
-| Add dependency scanning | ❌ | MEDIUM | Legg til Dependabot/pip-audit |
-| Add secrets scanning | ❌ | LOW | Legg til detect-secrets |
-| Create SECURITY.md | ❌ | LOW | Dokumenter security policy |
-| Encrypt all vault files | ❌ | HIGH | `ansible-vault encrypt` + password manager |
-| Review all secrets | ❌ | HIGH | Audit all vault files |
-| Enable branch protection | ✅ | HIGH | Already configured |
+| Punkt | Prioritet | Tiltak |
+|-------|-----------|--------|
+| Krypter alle vault-filer | HIGH | `ansible-vault encrypt` + passordhåndterer |
+| Slett debug-playbooks | HIGH | `rm -rf playbooks/debug/` |
+| Gjennomgå alle hemmeligheter | HIGH | Erstatt dummy-verdier, roter passord |
+| Aktiver SSH host key checking | MEDIUM | `host_key_checking = True` på kontrollnoden |
+| Fjern/begrens passwordless sudo | MEDIUM | Endre `Dockerfile` |
+| Pin Docker-image | MEDIUM | Endre `Dockerfile` |
+| Pin Python-pakker | MEDIUM | Endre `requirements.txt` |
+| Sårbarhetsskanning | MEDIUM | `pip-audit` / Trivy, manuelt eller i CI |
+| Branch protection på Git-serveren | MEDIUM | Krev merge request og godkjenning for `main` |
+| Secrets-skanning | LOW | gitleaks som pre-commit hook |
+| `.gitignore` for private nøkler | LOW | Legg til `*.pem`, `*.key`, `id_rsa*`, `id_ed25519*` |
+| Opprett `SECURITY.md` | LOW | Dokumenter sikkerhetspolicy |
 
 ---
 
 ## 🎓 LÆRINGSVERDI vs. SIKKERHET
 
-### Utmerket Balanse
-
-Dette repoet gjør en **utmerket jobb** med å balansere:
-
 ✅ **Pedagogisk tilgjengelighet:**
 
-- Lar studenter fokusere på Ansible og automation, ikke SSH troubleshooting
-- Reduserer friksjon som kan demotivere nybegynnere
-- Gir hands-on erfaring med produksjonsverktøy
+- Ingen eksterne kontoer eller tjenester trengs for å komme i gang
+- Studentene fokuserer på Ansible og automatisering, ikke SSH- eller passordtjeneste-feilsøking
+- Hands-on erfaring med verktøy som brukes i produksjon
 
 ✅ **Sikkerhetsvaner:**
 
-- Lærer secret management fra dag 1 (Ansible Vault)
-- Introduserer code quality automation (pre-commit)
-- Viser moderne DevOps workflow (Git, CI/CD)
-- Dokumenterer sikkerhetsbetraktninger tydelig
+- Hemmelighetshåndtering fra dag 1 (Ansible Vault)
+- Automatisert kodekvalitet (pre-commit)
+- Moderne Git-workflow (Conventional Commits)
+- Sikkerhetsbetraktninger dokumentert tydelig
 
 ✅ **Realistisk progresjon:**
 
-- Starter trygt i isolert DevContainer
-- Kan gradueres til mer sikre konfigurasjoner
+- Starter trygt i isolert DevContainer mot `localhost`
+- Kryptering, CI/CD og hardening kan innføres steg for steg
 - Tydelig vei fra lab til produksjon
 
-### Anbefalinger for Instruktør
+### Anbefalinger for instruktør
 
 1. **Kommuniser tydelig:**
 
-   ```
+   ```text
    "Dette er et lab-miljø. I produksjon:
-   - SSH host key checking fungerer normalt på dedikert server
-   - Fjern passwordless sudo
-   - Pin alle dependencies
+   - Krypter alle vault-filer, passordet ligger i en passordhåndterer
    - Slett debug-playbooks
-   - Krypter alle vault-filer"
+   - Aktiver SSH host key checking på kontrollnoden
+   - Fjern passwordless sudo
+   - Pin alle avhengigheter"
    ```
 
 2. **Inkluder produksjonsøvelse:**
-    - La studenter "harde" miljøet som sluttoppgave
-    - Sammenlign lab-config vs prod-config side-by-side
-    - Kjør security audit som del av pensum
+    - La studentene kryptere vault-filene som en del av kurset
+    - La studentene "herde" miljøet som sluttoppgave
+    - Sammenlign lab-config og prod-config side ved side
 
 3. **Bruk eksisterende dokumentasjon:**
-    - `CRITICAL-FIXES.md` forklarer vault password security
-    - `security-assessment.md` (denne filen) gir full oversikt
-    - Alle guides på norsk reduserer språkbarriere
+    - [Ansible Vault](ansible-vault-guide.md) for hemmelighetshåndtering
+    - [Pre-commit](pre-commit-guide.md) for kodekvalitet
+    - Denne siden for full oversikt
 
 ---
 
 ## 🏆 KONKLUSJON
 
-### For Opplæringsmiljø: ⭐⭐⭐⭐⭐ (Excellent)
+### Opplæringsmiljø: ⭐⭐⭐⭐⭐
 
-**Dette er et utmerket opplæringsmiljø** som:
+**Dette er et godt opplæringsmiljø** som:
 
-- Lærer secret management med Ansible Vault
-- Introduserer moderne DevOps praksis (pre-commit, CI/CD)
+- Lærer hemmelighetshåndtering med Ansible Vault
+- Introduserer moderne DevOps-praksis (pre-commit, Conventional Commits, dokumentasjon som kode)
+- Kan brukes uten eksterne tjenester eller kontoer
 - Balanserer pedagogikk med sikkerhet
-- Har comprehensive dokumentasjon på norsk
-- Tydelig kommuniserer lab vs. produksjon
+- Kommuniserer tydelig forskjellen mellom lab og produksjon
 
-**Strengths:**
+**Akseptable trade-offs for læring:**
 
-- ✅ Ansible Vault-mønster (industry standard)
-- ✅ Pre-commit hooks (DevOps best practice)
-- ✅ Conventional Commits (modern workflow)
-- ✅ Excellent .gitignore
-- ✅ Comprehensive Norwegian documentation
+- ⚠️ Ukrypterte vault-filer (kun dummy-verdier)
+- ⚠️ Passwordless sudo i containeren
+- ⚠️ SSH host key checking deaktivert
+- ⚠️ Debug-playbooks
+- ⚠️ Åpne pakkeversjoner
 
-**Acceptable Trade-offs for Learning:**
+### Produksjonsmiljø: ⚠️ (krever hardening)
 
-- ⚠️ SSH host key checking disabled (reduces friction)
-- ⚠️ Passwordless sudo in container (safe in isolated env)
-- ⚠️ Debug playbooks (pedagogical tools)
-- ⚠️ Unpinned packages (gets latest versions)
-- ⚠️ Unencrypted vault files (dummy values only)
+**Risikonivå:** LAV for lab, MEDIUM-HIGH for produksjon før hardening
 
-**Before Production:**
+**Nødvendige endringer:** Se "Sikkerhetssjekkliste - Produksjonsmiljø"
 
-1. 🚨 Remove debug playbooks
-2. 🚨 Encrypt all vault files
-3. ⚠️ Pin all dependencies
-4. ⚠️ Review and harden sudo access (hvis container brukes)
-5. ⚠️ Add security scanning
-6. ℹ️ SSH host key checking: Auto-OK på prod-server
-
-### For Produksjonsmiljø: ⚠️ (Requires Hardening)
-
-**Risk Level:** LOW for lab, MEDIUM-HIGH før hardening for produksjon
-
-**Required Changes:** Se "SECURITY CHECKLIST - For Produksjonsmiljø"
-
-**Estimated Effort to Production-Ready:** 2-4 timer (implementer alle HIGH/MEDIUM priority items)
+**Estimert innsats:** 2-4 timer for alle HIGH/MEDIUM-punkter
 
 ---
 
 ## 📚 TILLEGGSDOKUMENTASJON
 
-Se også:
-
-- `docs/ansible-vault-guide.md` - Ansible Vault beste praksis
-- `docs/github-branch-protection.md` - GitHub security
-- `docs/pre-commit-guide.md` - Code quality automation
+- [Ansible Vault](ansible-vault-guide.md) - hemmelighetshåndtering
+- [Pre-commit](pre-commit-guide.md) - automatisert kodekvalitet
+- [Conventional Commits](conventional-commits.md) - commit-format
 
 ---
 
-**Sist oppdatert:** 24. november 2025
-**Neste review:** Ved oppgradering til produksjon
+**Sist oppdatert:** 6. oktober 2026
+**Neste review:** Ved oppgradering til produksjon eller innføring av CI/CD

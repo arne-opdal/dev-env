@@ -20,10 +20,8 @@ nav = [
   { "Git" = [
     { "Git grunnleggende" = "git-basics.md" },
     { "Git Workflows (Fork & Branch)" = "git-workflows.md" },
-    { "Github Actions" = "github-actions-deploy.md" },
     { "Pre-commit" = "pre-commit-guide.md" },
     { "Conventional Commits" = "conventional-commits.md" },
-    { "GitHub Branch Protection" = "github-branch-protection.md" },
   ] },
   { "Sikkerhets betraktninger" = [
     { "Security assessment" = "security-assessment.md" },
