@@ -1,7 +1,7 @@
 # Security Assessment Report: dev-env
 
 **Dato:** 6. oktober 2026
-**Repository:** git.opdal.net/arne/dev-env
+**Repository:** github.com/arne-opdal/dev-env
 **Vurdert av:** Security Review
 **Formål:** Opplæringsmiljø for nettverkskonsulenter i DevOps og nettverksautomasjon
 

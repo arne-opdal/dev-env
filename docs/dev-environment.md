@@ -195,7 +195,7 @@ cd code
 clone repoet med:
 
 ```bash
-git clone https://git.opdal.net/arne/dev-env.git
+git clone https://github.com/arne-opdal/dev-env.git
 cd dev-env
 ```
 

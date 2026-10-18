@@ -5,8 +5,8 @@ site_author = "Arne Opdal"
 site_url = "https://www.ao-test.net/dev-setup/"
 copyright = "&copy; 2025 Arne Opdal"
 
-repo_name = "arne/dev-env"
-repo_url = "https://git.opdal.net/arne/dev-env"
+repo_name = "arne-opdal/dev-env"
+repo_url = "https://github.com/arne-opdal/dev-env"
 
 nav = [
   { "Hjem" = "index.md" },
