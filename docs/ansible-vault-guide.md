@@ -171,6 +171,99 @@ Da havner ikke hemmeligheten i shell-historikken.
 
 ---
 
+## Hvem kan se hemmelighetene?
+
+Kryptering i Git er bare halve jobben. Like viktig er det hva som skjer når
+noen *kjører* Ansible med vault-passordet tilgjengelig. Et godt eksempel er
+`ansible-inventory`, som er nyttig for feilsøking, men som skriver ut alle
+variablene til en host:
+
+```bash
+ansible-inventory --host host1
+ansible-inventory --list
+```
+
+Om hemmelighetene vises i klartekst, avhenger av **hvordan** de er kryptert
+(testet med ansible-core 2.19):
+
+| Lagring | Med vault-passord | Uten vault-passord |
+|---------|-------------------|--------------------|
+| Hel fil kryptert (`ansible-vault encrypt vault.yml`) | **Vises i klartekst** | Feiler: "no vault secrets found" |
+| Enkeltverdi kryptert (`encrypt_string`, `!vault \|`) | Vises kryptert: `{"__ansible_vault": "$ANSIBLE_VAULT;1.1;AES256..."}` | Virker, vises kryptert |
+
+En kryptert fil dekrypteres i sin helhet når den lastes, og da er verdiene
+vanlige strenger. En `!vault`-verdi forblir kryptert til en playbook faktisk
+bruker den. Referanser som `netbox_token: "{{ vault_netbox_token }}"` vises
+bare som teksten `{{ vault_netbox_token }}`, fordi `ansible-inventory` ikke
+evaluerer Jinja.
+
+Konsekvensen: Med hel-fil-kryptering og `ANSIBLE_VAULT_PASSWORD_FILE` satt i
+`.env` er én `ansible-inventory --list > inventory.json` nok til å legge alle
+hemmeligheter i en fil, i terminalhistorikken eller i en sak/chat der noen
+limer inn output for å få hjelp.
+
+### Anbefaling for produksjon
+
+1. **Krypter enkeltverdier i stedet for hele filer.** Behold
+   `vars.yml` + `vault.yml`-mønsteret, men la `vault.yml` være en vanlig
+   YAML-fil der bare selve hemmelighetene er `!vault`-krypterte:
+
+    ```yaml
+    # group_vars/all/vault.yml (ikke kryptert som fil)
+    vault_netbox_token: !vault |
+              $ANSIBLE_VAULT;1.1;AES256
+              6638643965396665343162...
+    vault_snmpv3_user_keys:
+      snmpuser:
+        auth_pass:
+          secret: !vault |
+                    $ANSIBLE_VAULT;1.1;AES256
+                    3135316439613934...
+          encrypted: true
+    ```
+
+    Hver løvverdi (`secret:`) krypteres for seg med
+    `ansible-vault encrypt_string --name secret`. Strukturen rundt, som
+    brukernavn og protokoller, kan godt være lesbar.
+
+2. **Ikke eksporter `ANSIBLE_VAULT_PASSWORD_FILE` permanent.** Gi passordet
+   bare til kommandoene som trenger det:
+
+    ```bash
+    ansible-playbook playbooks/site.yml --vault-password-file .vault_pass
+    ```
+
+    I Semaphore UI eller annen CI legges vault-passordet i malen/jobben, ikke
+    i miljøet til alle som logger inn. Da kan ikke en tilfeldig
+    `ansible-inventory` dekryptere noe ved et uhell.
+
+Punkt 1 og 2 sammen gir et inventory som er trygt å vise og dele under
+feilsøking, mens playbooks fungerer som før.
+
+### Ulemper med enkeltverdi-kryptering
+
+- `ansible-vault view` og `edit` virker ikke på `!vault`-verdier. Se én verdi
+  slik:
+
+    ```bash
+    ansible host1 -m ansible.builtin.debug -a var=vault_netbox_token
+    ```
+
+- Å bytte passord (`rekey`) krever at hver verdi krypteres på nytt.
+- Diffs i Git viser *hvilke* hemmeligheter som er endret (men ikke verdiene).
+  Det er som regel en fordel.
+
+### Det beskytter ikke alt
+
+Hemmeligheter kan fortsatt lekke når en playbook kjører:
+
+- `ansible.builtin.debug` av variabelen, eller `-vvv`, viser den dekrypterte
+  verdien. Oppgaver som håndterer hemmeligheter skal ha `no_log: true`.
+- Filer som genereres fra maler (f.eks. en startkonfig for en switch) kan
+  inneholde hemmeligheten i klartekst.
+
+---
+
 ## Kjøre playbooks
 
 Så lenge vault-filene er ukryptert, kjører playbooks uten spesielle flagg:
@@ -222,6 +315,8 @@ unset ANSIBLE_VAULT_PASSWORD_FILE
 - Bruk beskrivende navn for hemmelige variabler (prefiks med `vault_`)
 - Lagre vault-passordet i en passordhåndterer i produksjon
 - Roter vault-passord regelmessig
+- Krypter enkeltverdier (`!vault`) i produksjon, så `ansible-inventory` aldri viser klartekst (se [Hvem kan se hemmelighetene?](#hvem-kan-se-hemmelighetene))
+- Bruk `no_log: true` på oppgaver som håndterer hemmeligheter
 
 ### Ikke gjør
 
@@ -229,6 +324,8 @@ unset ANSIBLE_VAULT_PASSWORD_FILE
 - Commit `.vault_pass` eller `.env`
 - Del vault-passord i Slack/e-post
 - Lagre vault-passord i shell-historikk
+- Eksporter `ANSIBLE_VAULT_PASSWORD_FILE` permanent i produksjon
+- Lim inn output fra `ansible-inventory` i saker/chat uten å sjekke for hemmeligheter
 
 ---
 
@@ -291,6 +388,26 @@ ansible-vault create host_vars/newhost/vault.yml
 # Legg til hemmeligheter i editoren som åpnes:
 # ---
 # vault_ansible_password: "hemmelig-passord"
+```
+
+### Øvelse 4: Hva viser `ansible-inventory`?
+
+```bash
+# Krypter hele vault-filen og se på host1
+ansible-vault encrypt group_vars/all/vault.yml
+ansible-inventory --host host1          # vault_netbox_token i klartekst
+
+# Gå tilbake og krypter bare verdien
+ansible-vault decrypt group_vars/all/vault.yml
+ansible-vault encrypt_string 'netbox-token' --name vault_netbox_token
+# Erstatt linjen i group_vars/all/vault.yml med output fra kommandoen over
+
+ansible-inventory --host host1          # vises som __ansible_vault (kryptert)
+ansible host1 -m ansible.builtin.debug -a var=netbox_token   # playbooks ser verdien
+
+# Uten passord
+unset ANSIBLE_VAULT_PASSWORD_FILE
+ansible-inventory --host host1          # virker fortsatt, ingen klartekst
 ```
 
 ---

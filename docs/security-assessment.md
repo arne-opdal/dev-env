@@ -42,6 +42,7 @@ Miljøet er bevisst holdt enkelt: ingen eksterne tjenester for hemmeligheter, in
 🚨 **FORBEDRINGER FØR PRODUKSJON:**
 
 - Krypter alle vault-filer og lagre vault-passordet i en passordhåndterer
+- Bruk `!vault`-krypterte enkeltverdier og ikke eksporter `ANSIBLE_VAULT_PASSWORD_FILE` permanent, så `ansible-inventory` ikke viser hemmeligheter i klartekst (se [ansible-vault-guide](ansible-vault-guide.md#hvem-kan-se-hemmelighetene))
 - Slett debug-playbooks
 - Pin Docker-image og Python-pakker
 - Aktiver SSH host key checking
@@ -113,7 +114,7 @@ Miljøet er bevisst holdt enkelt: ingen eksterne tjenester for hemmeligheter, in
     - Tydelig separasjon mellom offentlige og hemmelige data
     - Studentene oppretter selv `.vault_pass` og øver på `ansible-vault encrypt`/`decrypt`
     - Ingen avhengighet til eksterne passordtjenester i treningsmiljøet
-- **Produksjonskrav:** Krypter alle vault-filer, og lagre vault-passordet i en passordhåndterer
+- **Produksjonskrav:** Krypter alle vault-filer, og lagre vault-passordet i en passordhåndterer. Merk at en hel kryptert fil vises i klartekst i `ansible-inventory` når passordet er tilgjengelig; krypter enkeltverdier for å unngå det.
 - **Produksjonsverdi:** ⭐⭐⭐⭐⭐ (Industri-standard når filene er kryptert)
 
 #### 2. **🛡️ .gitignore for hemmeligheter**
