@@ -2,7 +2,7 @@
 site_name = "Oppsett Utviklingsmiljø"
 site_description = "Dokumentasjon for oppsett og vedlikehold av utviklingsmiljø"
 site_author = "Arne Opdal"
-site_url = "https://www.ao-test.net/dev-setup/"
+site_url = "https://www.ao-test.net/dev-env/"
 copyright = "&copy; 2025 Arne Opdal"
 
 repo_name = "arne-opdal/dev-env"
