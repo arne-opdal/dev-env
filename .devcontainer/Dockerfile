@@ -9,6 +9,18 @@ RUN apt-get update && apt-get install -y \
     libatomic1 \
     && rm -rf /var/lib/apt/lists/*
 
+# Trust the IKTNH root CA (required behind SSL inspection)
+COPY iktnhRootCa.crt /usr/local/share/ca-certificates/iktnhRootCa.crt
+RUN update-ca-certificates
+
+# Make Python (pip, requests, certifi users) and Node (VS Code server/extensions)
+# use the system trust store instead of their bundled CA lists
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
+    REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
+    PIP_CERT=/etc/ssl/certs/ca-certificates.crt \
+    CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
+    NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/iktnhRootCa.crt
+
 # Create a non-root user
 ARG USERNAME=vscode
 ARG USER_UID=1000
